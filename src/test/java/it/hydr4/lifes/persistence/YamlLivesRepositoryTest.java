@@ -54,7 +54,7 @@ class YamlLivesRepositoryTest {
     }
 
     @Test
-    void badEntriesAreSkippedButOthersSurvive() throws IOException {
+    void oneUnreadableEntryAbortsInsteadOfDroppingItSilently() throws IOException {
         var repository = new YamlLivesRepository(file());
         var good = UUID.randomUUID();
         var bad = UUID.randomUUID();
@@ -72,9 +72,35 @@ class YamlLivesRepositoryTest {
                 total-deaths: 1
             """.formatted(good, bad));
 
-        var loaded = repository.loadAll();
-        assertEquals(1, loaded.size());
-        assertEquals("Good", loaded.get(good).name());
+        var exception = assertThrows(ConfigException.class, repository::loadAll);
+        assertTrue(exception.getMessage().contains(bad.toString()), exception.getMessage());
+        try (var siblings = Files.list(dir)) {
+            assertTrue(siblings.anyMatch(p -> p.getFileName().toString().startsWith("saves.yml.broken-")),
+                "the untouched copy is the only way back after an entry failure");
+        }
+    }
+
+    @Test
+    void anUnparseableUserKeyAborts() throws IOException {
+        var repository = new YamlLivesRepository(file());
+        Files.writeString(file(), """
+            version: 1
+            users:
+              "not-a-uuid":
+                name: Ghost
+                lives: 1
+                total-deaths: 0
+            """);
+        var exception = assertThrows(ConfigException.class, repository::loadAll);
+        assertTrue(exception.getMessage().contains("not-a-uuid"), exception.getMessage());
+    }
+
+    @Test
+    void missingVersionAborts() throws IOException {
+        var repository = new YamlLivesRepository(file());
+        Files.writeString(file(), "users: {}\n");
+        var exception = assertThrows(ConfigException.class, repository::loadAll);
+        assertTrue(exception.getMessage().contains("version"), exception.getMessage());
     }
 
     @Test

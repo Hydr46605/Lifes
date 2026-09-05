@@ -48,11 +48,13 @@ public final class YamlLivesRepository implements LivesRepository {
             return Map.of();
         }
         if (!(document instanceof Map<?, ?> root)) {
-            preserveCorrupt();
-            throw new ConfigException(file.toString(), "saves file is corrupt (root is not a mapping); preserved a copy and aborted startup");
+            throw corrupt("root is not a mapping");
         }
         var version = root.get("version");
-        if (version instanceof Integer parsedVersion && parsedVersion != FORMAT_VERSION) {
+        if (!(version instanceof Integer parsedVersion)) {
+            throw corrupt("version is missing or is not an integer");
+        }
+        if (parsedVersion != FORMAT_VERSION) {
             throw new ConfigException(file.toString(), "unsupported saves version " + parsedVersion);
         }
         var users = root.get("users");
@@ -60,20 +62,23 @@ public final class YamlLivesRepository implements LivesRepository {
             if (users == null) {
                 return Map.of();
             }
-            preserveCorrupt();
-            throw new ConfigException(file.toString(), "saves file is corrupt (users is not a mapping); preserved a copy and aborted startup");
+            throw corrupt("users is not a mapping");
         }
         var loaded = new LinkedHashMap<UUID, LivesAccount>();
         for (var entry : usersMap.entrySet()) {
-            var id = entry.getKey() instanceof String key ? Uuids.parseOrNull(key) : null;
-            var fields = entry.getValue();
-            if (id == null || !(fields instanceof Map<?, ?> map)) {
-                continue;
+            var rawKey = entry.getKey();
+            var id = rawKey instanceof String key ? Uuids.parseOrNull(key) : null;
+            if (id == null) {
+                throw corrupt("user key '" + rawKey + "' is not a valid UUID");
             }
-            var account = AccountCodec.decode(id, map);
-            if (account != null) {
-                loaded.put(id, account);
+            if (!(entry.getValue() instanceof Map<?, ?> fields)) {
+                throw corrupt("user " + id + " is not a mapping");
             }
+            var account = AccountCodec.decode(id, fields);
+            if (account == null) {
+                throw corrupt("user " + id + " has missing or invalid fields");
+            }
+            loaded.put(id, account);
         }
         return loaded;
     }
@@ -117,6 +122,15 @@ public final class YamlLivesRepository implements LivesRepository {
         } catch (IOException ignored) {
             // The startup failure below still names the corrupt file.
         }
+    }
+
+    /**
+     * Preserves the file and builds the failure to throw. A damaged save is never loaded partly:
+     * an entry dropped here would be erased for good by the next full snapshot write.
+     */
+    private ConfigException corrupt(String detail) {
+        preserveCorrupt();
+        return new ConfigException(file.toString(), "saves file is corrupt (" + detail + "); preserved a copy and aborted startup");
     }
 
     private void writeAtomically(String document) {
