@@ -4,6 +4,18 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-05
+
+### Fixed
+
+- Tab completion was still dead after 0.1.1. The provider had been repaired, but the tree it hung from could not work: everything after `/lives` was parsed as one greedy string argument, so the client was told to replace the rest of the line rather than the word being typed. Accepting a name out of `/lives check ` produced `/lives Ghost` and dropped the subcommand, and `/lives ` had no subcommand nodes to offer at all. `/lives` is now registered as a native Brigadier tree built from the generated descriptor, with one node per subcommand and one per argument, typed as a word and an integer. Completion replaces only the current word, and a non-numeric amount is refused by the parser with the vanilla error instead of reaching the handler.
+- A suggestion provider that threw produced an empty list with no trace of the failure. Provider errors are now logged against the provider key.
+
+### Changed
+
+- `vite` and `lifes` are registered as aliases of a single tree instead of three roots sharing one.
+- Each admin subcommand now carries its own permission requirement, so a sender without it does not receive the node in their command tree at all. The bare `/lives` deliberately carries none, because gating the root would hide every subcommand, and answers with the new configurable `no-permission` message when the sender may not run it.
+
 ## [0.1.1] - 2026-09-05
 
 ### Fixed
