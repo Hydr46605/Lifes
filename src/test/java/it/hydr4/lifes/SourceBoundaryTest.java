@@ -1,0 +1,44 @@
+package it.hydr4.lifes;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Architecture guard: Bukkit and Paper stay out of the domain layers.
+ * MiniMessage is allowed only in {@code text}; the rest of the domain is
+ * pure Java.
+ */
+class SourceBoundaryTest {
+    private static final List<String> EVERYWHERE = List.of("api", "core", "config", "persistence", "text");
+    private static final List<String> BUKKIT = List.of("org.bukkit", "io.papermc");
+    private static final Map<String, List<String>> BANS = Map.of(
+        "api", BUKKIT,
+        "core", BUKKIT,
+        "config", BUKKIT,
+        "persistence", BUKKIT,
+        "text", List.of("org.bukkit", "io.papermc", "me.clip")
+    );
+
+    @Test
+    void domainPackagesStayPlatformFree() throws IOException {
+        var roots = Path.of("src", "main", "java", "it", "hydr4", "lifes");
+        assertTrue(Files.isDirectory(roots), "run from the project root");
+        for (var pkg : EVERYWHERE) {
+            try (Stream<Path> sources = Files.walk(roots.resolve(pkg))) {
+                for (var file : sources.filter(p -> p.toString().endsWith(".java")).toList()) {
+                    var content = Files.readString(file);
+                    for (var banned : BANS.get(pkg)) {
+                        assertTrue(!content.contains(banned), file + " must not reference " + banned);
+                    }
+                }
+            }
+        }
+    }
+}
