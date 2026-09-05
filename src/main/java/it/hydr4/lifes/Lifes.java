@@ -2,6 +2,7 @@ package it.hydr4.lifes;
 
 import it.hydr4.lifes.api.LivesAccount;
 import it.hydr4.lifes.command.CommandWiring;
+import it.hydr4.lifes.command.suggest.PlayerNameIndex;
 import it.hydr4.lifes.core.AccountDirectory;
 import it.hydr4.lifes.core.DefaultLivesService;
 import it.hydr4.lifes.death.ActionRunner;
@@ -10,6 +11,8 @@ import it.hydr4.lifes.paper.AdminChangeNotifier;
 import it.hydr4.lifes.paper.BukkitEventBridge;
 import it.hydr4.lifes.paper.DeathListener;
 import it.hydr4.lifes.paper.JoinListener;
+import it.hydr4.lifes.paper.PlayerNameIndexListener;
+import it.hydr4.lifes.paper.ZeroLivesGuard;
 import it.hydr4.lifes.persistence.AsyncSaveQueue;
 import it.hydr4.lifes.persistence.YamlLivesRepository;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,6 +22,7 @@ import java.util.LinkedHashMap;
 
 /** Bootstrap only; all behavior lives in the composed packages. */
 public final class Lifes extends JavaPlugin {
+    private final PlayerNameIndex names = new PlayerNameIndex();
     private LifesRuntime runtime;
     private AccountDirectory directory;
     private DefaultLivesService service;
@@ -56,15 +60,25 @@ public final class Lifes extends JavaPlugin {
         );
         saveQueue.startPeriodic(runtime.settings().saveIntervalSeconds());
         service.addListener(saveQueue);
-        service.addListener(new ActionRunner(() -> runtime.actions(), () -> runtime.maximumLives(), getLogger()));
+        var actionRunner = new ActionRunner(() -> runtime.actions(), () -> runtime.maximumLives(), getLogger());
+        service.addListener(actionRunner);
         service.addListener(new BukkitEventBridge());
         service.addListener(new AdminChangeNotifier(() -> runtime.messages()));
 
         getServer().getPluginManager().registerEvents(new DeathListener(service, () -> runtime.settings()), this);
         getServer().getPluginManager().registerEvents(new JoinListener(() -> service), this);
+        getServer().getPluginManager().registerEvents(
+            new ZeroLivesGuard(service, () -> runtime.settings(), () -> runtime.messages(), actionRunner::runExhaustion),
+            this
+        );
+
+        for (var online : getServer().getOnlinePlayers()) {
+            names.online(online.getName());
+        }
+        getServer().getPluginManager().registerEvents(new PlayerNameIndexListener(names), this);
 
         try {
-            commandWiring = CommandWiring.register(this, runtime, service);
+            commandWiring = CommandWiring.register(this, runtime, service, directory, names);
         } catch (RuntimeException exception) {
             getLogger().severe("Registering commands failed: " + exception.getMessage());
             return;

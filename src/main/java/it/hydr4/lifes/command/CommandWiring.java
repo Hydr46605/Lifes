@@ -4,11 +4,14 @@ import it.hydr4.democracy.core.command.CommandRegistration;
 import it.hydr4.democracy.core.command.DefaultCommandCatalog;
 import it.hydr4.democracy.core.command.DefaultCommandDispatcher;
 import it.hydr4.democracy.core.command.DefaultCommandParser;
+import it.hydr4.democracy.core.command.DefaultCommandSuggester;
 import it.hydr4.democracy.paper.command.PaperCommandRegistrar;
 import it.hydr4.lifes.LifesRuntime;
 import it.hydr4.lifes.api.LivesService;
 import it.hydr4.lifes.command.suggest.OnlinePlayerSuggestions;
+import it.hydr4.lifes.command.suggest.PlayerNameIndex;
 import it.hydr4.lifes.command.suggest.SuggestionKeys;
+import it.hydr4.lifes.core.AccountDirectory;
 import org.bukkit.plugin.Plugin;
 
 /** Registers the generated command; close to unregister. */
@@ -23,14 +26,21 @@ public final class CommandWiring implements AutoCloseable {
         this.registration = registration;
     }
 
-    public static CommandWiring register(Plugin plugin, LifesRuntime runtime, LivesService service) {
+    public static CommandWiring register(
+        Plugin plugin,
+        LifesRuntime runtime,
+        LivesService service,
+        AccountDirectory directory,
+        PlayerNameIndex names
+    ) {
         var catalog = new DefaultCommandCatalog();
-        catalog.registerSuggestionProvider(SuggestionKeys.ONLINE_PLAYERS, new OnlinePlayerSuggestions());
+        catalog.registerSuggestionProvider(SuggestionKeys.ONLINE_PLAYERS, new OnlinePlayerSuggestions(names, directory));
         var handler = new LivesCommand(runtime, service);
         var generated = new LivesCommandDemocracyCommand(handler);
         var registration = catalog.register(generated);
-        var dispatcher = new DefaultCommandDispatcher(catalog, new DefaultCommandParser(catalog));
-        var registrar = new PaperCommandRegistrar(plugin, catalog, dispatcher);
+        var parser = new DefaultCommandParser(catalog);
+        var dispatcher = new DefaultCommandDispatcher(catalog, parser);
+        var registrar = new PaperCommandRegistrar(plugin, catalog, dispatcher, new DefaultCommandSuggester(catalog));
         registrar.register();
         return new CommandWiring(catalog, registrar, registration);
     }
@@ -38,5 +48,6 @@ public final class CommandWiring implements AutoCloseable {
     @Override
     public void close() {
         registration.close();
+        registrar.close();
     }
 }

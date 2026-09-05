@@ -41,4 +41,20 @@ class SourceBoundaryTest {
             }
         }
     }
+
+    @Test
+    void suggestionProvidersMustNotTouchBukkit() throws IOException {
+        // Paper resolves Brigadier suggestions off the main thread. A provider that reads the
+        // server API either throws there or, worse, has its failure swallowed into an empty list.
+        var root = Path.of("src", "main", "java", "it", "hydr4", "lifes", "command", "suggest");
+        assertTrue(Files.isDirectory(root), "run from the project root");
+        try (Stream<Path> sources = Files.walk(root)) {
+            for (var file : sources.filter(p -> p.toString().endsWith(".java")).toList()) {
+                var content = Files.readString(file);
+                for (var banned : BUKKIT) {
+                    assertTrue(!content.contains(banned), file + " must not reference " + banned);
+                }
+            }
+        }
+    }
 }
