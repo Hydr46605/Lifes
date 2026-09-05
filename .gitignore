@@ -3,14 +3,18 @@ build/
 out/
 run/
 *.log
+*.tmp
 *.iml
 .idea/
 .vscode/
-docs/superpowers/
-*.tmp
-.attach_*
+
+# JVM crash and attach artifacts
 hs_err_*
 replay_*
+.attach_*
+
+# local design notes, the shipped sources are the record
+docs/
 
 # design source art, only the rendered asset ships
 Zyle.png
