@@ -4,6 +4,20 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-05
+
+### Fixed
+
+- Tab completion for player arguments returned nothing at all. The provider read the Bukkit API on Paper's suggestion threads, where that is not allowed, and swallowed the resulting failure into an empty list. Suggestions now come from a name index kept in step on the main thread, and known offline accounts are offered too.
+- `/lives add <player> <huge amount>` overflowed to a negative number, clamped the result to zero lives and ran the exit pipeline, so a command meant to give lives permanently banned the target. The sum is now computed without wrapping.
+- An account left at zero lives could play forever after its ban was lifted, because the exit pipeline only fired on the transition into zero. `exhaustion.on-zero-lives-join` now decides what a connect does: `REAPPLY` (default), `KICK` or `IGNORE`. A death that finds an account already at zero lives re-runs the pipeline as well, which also covers a crash between the save and the ban.
+- A single unreadable entry in `saves.yml` was skipped in silence and then erased for good by the next full save. Any damaged entry now preserves a copy of the file and aborts startup, the same way root-level corruption already did.
+- `saves.yml` with a missing or non-integer `version` loaded as version 1; it now aborts like any other unsupported file.
+
+### Changed
+
+- The default `lives-self` and `lives-other` messages no longer render `{lives}/{maximum}`. `lives.maximum` is the cap on admin commands, not the player's life pool, so the fraction read as a false total. The `{maximum}` placeholder still resolves for anyone who wants it in their own template.
+
 ## [0.1.0] - 2026-09-05
 
 ### Added
@@ -17,5 +31,6 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - Bukkit `LifeChangeEvent` for integrations; domain listeners for internal reactions.
 - Hermetic build: checksum-pinned Gradle, `-Werror`, SemVer validation, CI on Linux and Windows, release automation for `v` tags.
 
-[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.0

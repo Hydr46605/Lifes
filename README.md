@@ -12,7 +12,7 @@ Built for **Zyle Extreme**, the permadeath mode of the Minecraft server **Zyle**
 |---|---|
 | Platform | Paper 1.21.11 |
 | Java | 21 |
-| Release | [v0.1.0](https://github.com/Hydr46605/Lifes/releases/tag/v0.1.0) |
+| Release | [v0.1.1](https://github.com/Hydr46605/Lifes/releases/tag/v0.1.1) |
 | License | [Apache 2.0](LICENSE) |
 
 ## Install
@@ -33,7 +33,7 @@ Aliases: `vite`, `lifes`.
 | `/lives reset <player>` | `lifes.command.reset` (op) | Restores the default amount |
 | `/lives reload` | `lifes.command.reload` (op) | Reloads `settings.yml` |
 
-Admin operations work on offline players whenever the account is known to Lifes. Tab completion only offers what the sender is allowed to run.
+Admin operations work on offline players whenever the account is known to Lifes. Tab completion only offers what the sender is allowed to run, and lists online players before known offline accounts.
 
 ## Placeholders
 
@@ -55,9 +55,10 @@ Requires PlaceholderAPI. All of them resolve for offline players with a known ac
 
 - Unknown keys, wrong types and out-of-range values fail startup with the exact configuration path. There are no silent fallbacks.
 - `death.ignored-causes` skips deaths matching an `EntityDamageEvent.DamageCause` name.
-- `death.actions` runs on every death that costs a life. `exhaustion.actions` runs once when lives reach zero, and `PERMABAN` is the default exit there.
+- `death.actions` runs on every death that costs a life. `exhaustion.actions` runs when lives reach zero, and `PERMABAN` is the default exit there.
+- `exhaustion.on-zero-lives-join` covers an account that connects while already at zero lives, which is what happens after an admin lifts a ban: `REAPPLY` runs the exit pipeline again, `KICK` only removes the session, `IGNORE` lets them play on.
 - Actions are ordered and typed: `MESSAGE`, `SOUND`, `COMMAND`, `PERMABAN`.
-- `saves.yml` is written atomically and off the main thread. A corrupt file is preserved as `saves.yml.broken-<timestamp>` and startup aborts instead of resetting data.
+- `saves.yml` is written atomically and off the main thread. Any damage, at the root or inside a single entry, is preserved as `saves.yml.broken-<timestamp>` and aborts startup instead of dropping accounts or resetting data.
 
 ## Building
 
