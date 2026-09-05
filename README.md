@@ -74,3 +74,8 @@ Lifes targets Paper **1.21.11** because that is what Zyle runs, and it is a fini
 ## Contributing
 
 Contributions and forks are open while the repository is in its working period. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the ground rules, [SECURITY.md](SECURITY.md) to report a vulnerability, and [CHANGELOG.md](CHANGELOG.md) for what changed. The changelog follows [Keep a Changelog](https://keepachangelog.com/) and the project follows [Semantic Versioning](https://semver.org/).
+
+---
+
+> [!NOTE]
+> **Built with AI, shipped by a human.** Lifes was developed with the help of AI coding tools under Hydr4's direction. Architecture, decisions, review and testing are human; the boring parts were accelerated. See [AGENTS.md](AGENTS.md) for the rules this repo uses when AI is involved.
