@@ -86,7 +86,7 @@ class LivesCommandTest {
     void selfCheckCreatesTheAccountLazily() {
         var result = harness.execute(player, "lives");
         assertInstanceOf(CommandResult.Success.class, result);
-        assertTrue(plain(result).contains("3/10"), plain(result));
+        assertTrue(plain(result).contains("You have 3 lives"), plain(result));
         assertEquals(1, directory.size());
     }
 
