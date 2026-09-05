@@ -24,7 +24,7 @@ public final class SettingsParser {
     private static final Set<String> ROOT_KEYS = Set.of("version", "lives", "death", "exhaustion", "persistence", "messages");
     private static final Set<String> LIVES_KEYS = Set.of("default", "maximum");
     private static final Set<String> DEATH_KEYS = Set.of("cost-per-death", "ignored-causes", "actions");
-    private static final Set<String> EXHAUSTION_KEYS = Set.of("actions");
+    private static final Set<String> EXHAUSTION_KEYS = Set.of("actions", "on-zero-lives-join");
     private static final Set<String> PERSISTENCE_KEYS = Set.of("save-interval-seconds", "save-off-thread");
     private static final int FORMAT_VERSION = 1;
 
@@ -54,6 +54,7 @@ public final class SettingsParser {
         var exhaustion = section(root, "exhaustion", filePath);
         expectKeys(exhaustion, EXHAUSTION_KEYS, path(filePath, "exhaustion"));
         var exhaustionActions = actions(exhaustion, "actions", path(filePath, "exhaustion"));
+        var zeroLivesJoin = optionalEnum(exhaustion, "on-zero-lives-join", ZeroLivesJoin.class, ZeroLivesJoin.REAPPLY, path(filePath, "exhaustion"));
 
         var persistence = section(root, "persistence", filePath);
         expectKeys(persistence, PERSISTENCE_KEYS, path(filePath, "persistence"));
@@ -68,6 +69,7 @@ public final class SettingsParser {
             ignoredCauses,
             deathActions,
             exhaustionActions,
+            zeroLivesJoin,
             saveInterval,
             saveOffThread,
             messages
@@ -117,6 +119,26 @@ public final class SettingsParser {
             throw new ConfigException(path(sectionPath, key), "expected true or false, got " + typeName(value));
         }
         return flag;
+    }
+
+    /**
+     * Reads an optional enum key. An absent key takes the documented default; a present key must
+     * name one of the constants, so a typo still fails with the exact path.
+     */
+    private static <E extends Enum<E>> E optionalEnum(Map<?, ?> section, String key, Class<E> type, E fallback, String sectionPath) {
+        var value = section.get(key);
+        if (value == null) {
+            return fallback;
+        }
+        var options = java.util.Arrays.stream(type.getEnumConstants()).map(Enum::name).sorted().toList();
+        if (!(value instanceof String text) || text.isBlank()) {
+            throw new ConfigException(path(sectionPath, key), "expected one of " + options + ", got " + typeName(value));
+        }
+        try {
+            return Enum.valueOf(type, text.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            throw new ConfigException(path(sectionPath, key), "expected one of " + options + ", got '" + text + "'");
+        }
     }
 
     private static Set<String> causeNames(Map<?, ?> death, String sectionPath) {

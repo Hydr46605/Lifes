@@ -13,6 +13,7 @@ public record LivesSettings(
     Set<String> ignoredDeathCauses,
     List<DeathActionSpec> deathActions,
     List<DeathActionSpec> exhaustionActions,
+    ZeroLivesJoin zeroLivesJoin,
     int saveIntervalSeconds,
     boolean saveOffThread,
     MessageTemplates messages

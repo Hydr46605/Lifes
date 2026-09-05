@@ -32,6 +32,11 @@ exhaustion:
       message: "<bold><dark_red>{player} ran out of lives and is gone forever.</dark_red></bold>"
     - type: PERMABAN
       reason: "You have run out of lives."
+  # What happens when an account that is already at zero lives connects, for example after
+  # an admin lifted the ban. REAPPLY runs the actions above again (the default exit, so a
+  # pardon alone does not resurrect anyone), KICK only removes them from the session,
+  # IGNORE lets them play on. Values other than these three fail startup.
+  on-zero-lives-join: REAPPLY
 
 persistence:
   # Seconds between periodic saves; 0 disables. Every change also saves.
@@ -42,8 +47,8 @@ persistence:
 messages:
   # MiniMessage. Placeholders are documented per key; unknown keys fail startup.
   prefix: "<dark_gray>[<gold>Lifes</gold>]</dark_gray> "
-  lives-self: "You have <bold><gold>{lives}</gold></bold>/{maximum} lives."
-  lives-other: "{player} has <bold><gold>{lives}</gold></bold>/{maximum} lives."
+  lives-self: "You have <bold><gold>{lives}</gold></bold> lives."
+  lives-other: "{player} has <bold><gold>{lives}</gold></bold> lives."
   lives-set: "Set <white>{player}</white> to <bold><gold>{lives}</gold></bold> lives."
   lives-add: "Gave <white>{amount}</white> lives to <white>{player}</white> (now <bold><gold>{lives}</gold></bold>)."
   lives-remove: "Removed <white>{amount}</white> lives from <white>{player}</white> (now <bold><gold>{lives}</gold></bold>)."
@@ -51,4 +56,5 @@ messages:
   lives-unknown-player: "No known account for <white>{player}</white>."
   lives-invalid-amount: "Amount must be between {minimum} and {maximum}."
   lives-target-notify: "An administrator set your lives to <bold><gold>{lives}</gold></bold>."
+  lives-exhausted-kick: "<red>You are out of lives. The game is over for this account.</red>"
   lives-reload-done: "Configuration reloaded."

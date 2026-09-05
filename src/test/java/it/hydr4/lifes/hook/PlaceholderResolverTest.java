@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class PlaceholderResolverTest {
     private final AccountDirectory directory = new AccountDirectory();
     private final LivesService service = new DefaultLivesService(directory, () -> new it.hydr4.lifes.config.LivesSettings(
-        3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), 0, true, null));
+        3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null));
     private final PlaceholderResolver resolver = new PlaceholderResolver(
         service, () -> 10, () -> 3);
 

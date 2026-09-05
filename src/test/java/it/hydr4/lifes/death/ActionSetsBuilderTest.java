@@ -20,7 +20,7 @@ class ActionSetsBuilderTest {
             3, 10, 1, java.util.Set.of(),
             List.of(new DeathActionSpec("MESSAGE", Map.of("target", "BROADCAST", "message", "died"), "death.actions[0]")),
             List.of(new DeathActionSpec("PERMABAN", Map.of(), "exhaustion.actions[0]")),
-            0, true, null);
+            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var sets = ActionSetsBuilder.build(settings);
         assertEquals(1, sets.death().size());
         assertInstanceOf(MessageAction.class, sets.death().get(0));
@@ -34,7 +34,7 @@ class ActionSetsBuilderTest {
             3, 10, 1, java.util.Set.of(),
             List.of(new DeathActionSpec("EXPLODE", Map.of(), "death.actions[0]")),
             List.of(),
-            0, true, null);
+            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings));
         assertEquals(
             "death.actions[0]: unknown action type 'EXPLODE'; expected MESSAGE, SOUND, COMMAND or PERMABAN",
@@ -47,7 +47,7 @@ class ActionSetsBuilderTest {
             3, 10, 1, java.util.Set.of(),
             List.of(new DeathActionSpec("MESSAGE", Map.of(), "death.actions[0]")),
             List.of(),
-            0, true, null);
+            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings));
         assertEquals("death.actions[0].message: expected a non-blank string", exception.getMessage());
     }

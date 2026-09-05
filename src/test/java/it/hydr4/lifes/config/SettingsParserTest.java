@@ -106,6 +106,28 @@ class SettingsParserTest {
     }
 
     @Test
+    void zeroLivesJoinDefaultsToReapply() throws IOException {
+        assertEquals(ZeroLivesJoin.REAPPLY, SettingsParser.parse(write(VALID)).zeroLivesJoin());
+    }
+
+    @Test
+    void zeroLivesJoinAcceptsEveryPolicy() throws IOException {
+        for (var policy : ZeroLivesJoin.values()) {
+            var content = VALID.replace("exhaustion:\n  actions:",
+                "exhaustion:\n  on-zero-lives-join: " + policy.name() + "\n  actions:");
+            assertEquals(policy, SettingsParser.parse(write(content)).zeroLivesJoin(), policy.name());
+        }
+    }
+
+    @Test
+    void unknownZeroLivesJoinPolicyFailsWithPath() throws IOException {
+        var broken = VALID.replace("exhaustion:\n  actions:",
+            "exhaustion:\n  on-zero-lives-join: RESURRECT\n  actions:");
+        var exception = assertThrows(ConfigException.class, () -> SettingsParser.parse(write(broken)));
+        assertTrue(exception.getMessage().contains("exhaustion.on-zero-lives-join"), exception.getMessage());
+    }
+
+    @Test
     void booleanMustBeBoolean() throws IOException {
         var broken = VALID.replace("save-off-thread: true", "save-off-thread: yes-please");
         var exception = assertThrows(ConfigException.class, () -> SettingsParser.parse(write(broken)));
