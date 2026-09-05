@@ -1,0 +1,16 @@
+.gradle/
+build/
+out/
+run/
+*.log
+*.iml
+.idea/
+.vscode/
+docs/superpowers/
+*.tmp
+.attach_*
+hs_err_*
+replay_*
+
+# design source art, only the rendered asset ships
+Zyle.png
