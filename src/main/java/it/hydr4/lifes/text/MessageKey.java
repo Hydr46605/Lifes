@@ -13,7 +13,8 @@ public enum MessageKey {
     LIVES_INVALID_AMOUNT("lives-invalid-amount", "Amount must be between {minimum} and {maximum}.", true),
     LIVES_TARGET_NOTIFY("lives-target-notify", "An administrator set your lives to <bold><gold>{lives}</gold></bold>.", true),
     LIVES_EXHAUSTED_KICK("lives-exhausted-kick", "<red>You are out of lives. The game is over for this account.</red>", false),
-    LIVES_RELOAD_DONE("lives-reload-done", "Configuration reloaded.", true);
+    LIVES_RELOAD_DONE("lives-reload-done", "Configuration reloaded.", true),
+    NO_PERMISSION("no-permission", "<red>You do not have permission to use this command.</red>", true);
 
     private final String key;
     private final String defaultTemplate;

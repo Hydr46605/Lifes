@@ -58,3 +58,4 @@ messages:
   lives-target-notify: "An administrator set your lives to <bold><gold>{lives}</gold></bold>."
   lives-exhausted-kick: "<red>You are out of lives. The game is over for this account.</red>"
   lives-reload-done: "Configuration reloaded."
+  no-permission: "<red>You do not have permission to use this command.</red>"
