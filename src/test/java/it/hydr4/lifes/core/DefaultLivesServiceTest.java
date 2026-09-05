@@ -25,7 +25,7 @@ class DefaultLivesServiceTest {
     }
 
     private static LivesSettings settings() {
-        return new LivesSettings(3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), 0, true, MessageTemplates.withOverrides(Map.of()));
+        return new LivesSettings(3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, MessageTemplates.withOverrides(Map.of()));
     }
 
     @Test
@@ -94,6 +94,15 @@ class DefaultLivesServiceTest {
         service.create(id, "Hydr4");
         var change = service.adjust(id, LifeChangeReason.ADMIN_ADD, 50);
         assertEquals(10, change.after().lives());
+    }
+
+    @Test
+    void adminAddWithAHugeAmountSaturatesInsteadOfDrainingLives() {
+        var id = UUID.randomUUID();
+        service.create(id, "Hydr4");
+        var change = service.adjust(id, LifeChangeReason.ADMIN_ADD, Integer.MAX_VALUE);
+        assertEquals(10, change.after().lives(), "overflowing the int range must not land on zero lives");
+        assertTrue(!change.after().exhausted(), "a gift of lives must never look like exhaustion");
     }
 
     @Test

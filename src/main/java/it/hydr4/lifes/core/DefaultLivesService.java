@@ -73,8 +73,10 @@ public final class DefaultLivesService implements LivesService {
             var maximum = settings.get().maximumLives();
             var after = switch (reason) {
                 case ADMIN_SET -> clamp(live, Checks.inRange(amount, 0, maximum, "amount"));
-                case ADMIN_ADD -> clamp(live, live.lives() + Checks.atLeast(amount, 0, "amount"));
-                case ADMIN_REMOVE -> clamp(live, live.lives() - Checks.atLeast(amount, 0, "amount"));
+                // Widened on purpose: lives + a huge amount must saturate at the cap, not wrap
+                // around to a negative number that clamp() would then read as zero lives.
+                case ADMIN_ADD -> clamp(live, (long) live.lives() + Checks.atLeast(amount, 0, "amount"));
+                case ADMIN_REMOVE -> clamp(live, (long) live.lives() - Checks.atLeast(amount, 0, "amount"));
                 case ADMIN_RESET -> clamp(live, settings.get().defaultLives());
                 case DEATH -> throw new IllegalArgumentException("DEATH must use applyDeath");
             };
@@ -89,8 +91,8 @@ public final class DefaultLivesService implements LivesService {
         listeners.add(Checks.notNull(listener, "listener"));
     }
 
-    private LivesAccount clamp(LivesAccount before, int lives) {
-        var bounded = Math.max(0, Math.min(lives, settings.get().maximumLives()));
+    private LivesAccount clamp(LivesAccount before, long lives) {
+        var bounded = (int) Math.max(0L, Math.min(lives, settings.get().maximumLives()));
         var exhausted = bounded == 0;
         return new LivesAccount(before.uuid(), before.name(), bounded, before.totalDeaths(), before.lastDeathAt(), exhausted);
     }
