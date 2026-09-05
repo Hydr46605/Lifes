@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/lifes-logo.png" width="220" alt="Lifes logo">
+</p>
+
 # Lifes
 
 Permadeath lives for PaperMC servers. Every player owns a number of lives, each death spends one, and when the last life is gone the configured exit pipeline runs. The default pipeline is a permanent ban.
