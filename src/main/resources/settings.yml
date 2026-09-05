@@ -1,0 +1,54 @@
+# Lifes configuration. Every wrong value fails startup with the exact path.
+version: 1
+
+lives:
+  # Lives a brand new account starts with (1..100000).
+  default: 3
+  # Hard cap for any life count, including admin commands (>= default).
+  maximum: 10
+
+death:
+  # Lives consumed by every counted death (0..1000).
+  cost-per-death: 1
+  # Deaths with these damage causes consume no lives.
+  # Valid names: https://jd.papermc.io/paper/1.21/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+  ignored-causes: []
+  # Runs in order after every counted death.
+  # Types: MESSAGE, SOUND, COMMAND, PERMABAN
+  actions:
+    - type: MESSAGE
+      target: VICTIM          # VICTIM or BROADCAST
+      message: "<red>You lost a life! <bold><gold>{lives}</gold></bold> remain."
+    - type: SOUND
+      sound: entity.wither.spawn
+      volume: 1.0             # 0..64
+      pitch: 0.6              # 0..4
+
+exhaustion:
+  # Runs in order, once, when lives reach zero. This is the exit path.
+  actions:
+    - type: MESSAGE
+      target: BROADCAST
+      message: "<bold><dark_red>{player} ran out of lives and is gone forever.</dark_red></bold>"
+    - type: PERMABAN
+      reason: "You have run out of lives."
+
+persistence:
+  # Seconds between periodic saves; 0 disables. Every change also saves.
+  save-interval-seconds: 300
+  # Write saves.yml off the main thread (keep true).
+  save-off-thread: true
+
+messages:
+  # MiniMessage. Placeholders are documented per key; unknown keys fail startup.
+  prefix: "<dark_gray>[<gold>Lifes</gold>]</dark_gray> "
+  lives-self: "You have <bold><gold>{lives}</gold></bold>/{maximum} lives."
+  lives-other: "{player} has <bold><gold>{lives}</gold></bold>/{maximum} lives."
+  lives-set: "Set <white>{player}</white> to <bold><gold>{lives}</gold></bold> lives."
+  lives-add: "Gave <white>{amount}</white> lives to <white>{player}</white> (now <bold><gold>{lives}</gold></bold>)."
+  lives-remove: "Removed <white>{amount}</white> lives from <white>{player}</white> (now <bold><gold>{lives}</gold></bold>)."
+  lives-reset: "Reset <white>{player}</white> to <bold><gold>{lives}</gold></bold> lives."
+  lives-unknown-player: "No known account for <white>{player}</white>."
+  lives-invalid-amount: "Amount must be between {minimum} and {maximum}."
+  lives-target-notify: "An administrator set your lives to <bold><gold>{lives}</gold></bold>."
+  lives-reload-done: "Configuration reloaded."

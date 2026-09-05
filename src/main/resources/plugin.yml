@@ -1,0 +1,41 @@
+name: Lifes
+version: "${version}"
+main: it.hydr4.lifes.Lifes
+api-version: '1.21'
+description: Permadeath lives tracking with configurable death consequences.
+author: Hydr4
+website: https://github.com/Hydr46605/Lifes
+softdepend:
+  - PlaceholderAPI
+permissions:
+  lifes.command.check.self:
+    description: Check your own lives
+    default: true
+  lifes.command.check.others:
+    description: Check other players' lives
+    default: op
+  lifes.command.set:
+    description: Set a player's lives
+    default: op
+  lifes.command.add:
+    description: Give lives to a player
+    default: op
+  lifes.command.remove:
+    description: Remove lives from a player
+    default: op
+  lifes.command.reset:
+    description: Reset a player to the default lives
+    default: op
+  lifes.command.reload:
+    description: Reload the Lifes configuration
+    default: op
+  lifes.admin:
+    description: Grants every administrative lives command
+    default: op
+    children:
+      lifes.command.check.others: true
+      lifes.command.set: true
+      lifes.command.add: true
+      lifes.command.remove: true
+      lifes.command.reset: true
+      lifes.command.reload: true
