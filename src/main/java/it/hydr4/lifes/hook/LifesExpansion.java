@@ -10,13 +10,15 @@ import org.jetbrains.annotations.Nullable;
 /** PlaceholderAPI expansion backed by {@link PlaceholderResolver}. */
 public final class LifesExpansion extends PlaceholderExpansion {
     private final PlaceholderResolver resolver;
+    private final String version;
 
-    public LifesExpansion(LifesRuntime runtime, LivesService service) {
+    public LifesExpansion(LifesRuntime runtime, LivesService service, String version) {
         this.resolver = new PlaceholderResolver(
             service,
             runtime::maximumLives,
             () -> runtime.settings().defaultLives()
         );
+        this.version = version;
     }
 
     @Override
@@ -31,7 +33,7 @@ public final class LifesExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return "0.1.0";
+        return version;
     }
 
     @Override

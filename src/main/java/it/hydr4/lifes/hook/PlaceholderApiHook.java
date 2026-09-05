@@ -23,7 +23,7 @@ public final class PlaceholderApiHook implements AutoCloseable {
         }
         var logger = plugin.getLogger();
         try {
-            var expansion = new LifesExpansion(runtime, service);
+            var expansion = new LifesExpansion(runtime, service, plugin.getPluginMeta().getVersion());
             if (!expansion.register()) {
                 logger.warning("PlaceholderAPI refused the Lifes expansion registration.");
                 return Optional.empty();

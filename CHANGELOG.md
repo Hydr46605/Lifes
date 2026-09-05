@@ -13,6 +13,7 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - An account left at zero lives could play forever after its ban was lifted, because the exit pipeline only fired on the transition into zero. `exhaustion.on-zero-lives-join` now decides what a connect does: `REAPPLY` (default), `KICK` or `IGNORE`. A death that finds an account already at zero lives re-runs the pipeline as well, which also covers a crash between the save and the ban.
 - A single unreadable entry in `saves.yml` was skipped in silence and then erased for good by the next full save. Any damaged entry now preserves a copy of the file and aborts startup, the same way root-level corruption already did.
 - `saves.yml` with a missing or non-integer `version` loaded as version 1; it now aborts like any other unsupported file.
+- The PlaceholderAPI expansion reported a hardcoded `0.1.0` no matter which build was running. It now publishes the version the jar was built with.
 
 ### Changed
 
