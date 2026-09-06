@@ -49,9 +49,14 @@ public record WebhookEndpoint(String url, String redacted) {
         if (!matcher.matches()) {
             throw new ConfigException(path, "expected the form /api/webhooks/<numeric id>/<token>");
         }
+        // The query string carries no secret (the token lives in the path) but Discord reads
+        // flags from it: a components-only payload needs ?with_components=true, and forum
+        // channels need ?thread_id=..., so dropping it would silently misdeliver.
+        var rawQuery = uri.getRawQuery();
+        var suffix = rawQuery == null || rawQuery.isBlank() ? "" : "?" + rawQuery;
         return new WebhookEndpoint(
-            "https://" + host + webhookPath,
-            "https://" + host + "/api/webhooks/" + matcher.group(1) + "/***token redacted***"
+            "https://" + host + webhookPath + suffix,
+            "https://" + host + "/api/webhooks/" + matcher.group(1) + "/***token redacted***" + suffix
         );
     }
 }

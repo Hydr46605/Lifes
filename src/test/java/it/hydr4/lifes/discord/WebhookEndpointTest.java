@@ -70,4 +70,20 @@ class WebhookEndpointTest {
             assertFalse(endpoint.redacted().contains("secret-token-abc"), endpoint.redacted());
         }
     }
+
+    @Test
+    void discordFlagsInTheQueryStringSurvive() {
+        // A components-only payload is rejected with 400/50006 unless the webhook opts into
+        // components, so the query string must reach Discord untouched.
+        var endpoint = WebhookEndpoint.parse(
+            "https://discord.com/api/webhooks/1234567890123456789/secret-token-abc?with_components=true",
+            "death.actions[0].webhook");
+        assertEquals(
+            "https://discord.com/api/webhooks/1234567890123456789/secret-token-abc?with_components=true",
+            endpoint.url());
+        assertEquals(
+            "https://discord.com/api/webhooks/1234567890123456789/***token redacted***?with_components=true",
+            endpoint.redacted());
+        assertFalse(endpoint.redacted().contains("secret-token-abc"), endpoint.redacted());
+    }
 }

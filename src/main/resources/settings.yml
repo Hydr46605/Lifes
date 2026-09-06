@@ -25,6 +25,8 @@ death:
   #         "username": "Lifes",
   #         "content": "**{player}** died. {lives} lives left."
   #       }
+  # A payload with components but no "content" needs ?with_components=true on the webhook
+  # URL, otherwise Discord rejects it with 400 "Cannot send an empty message".
   actions:
     - type: MESSAGE
       target: VICTIM          # VICTIM or BROADCAST
