@@ -12,7 +12,7 @@ Built for **Zyle Extreme**, the permadeath mode of the Minecraft server **Zyle**
 |---|---|
 | Platform | Paper 1.21.11 |
 | Java | 21 |
-| Release | [v0.1.2](https://github.com/Hydr46605/Lifes/releases/tag/v0.1.2) |
+| Release | [v0.2.0](https://github.com/Hydr46605/Lifes/releases/tag/v0.2.0) |
 | License | [Apache 2.0](LICENSE) |
 
 ## Install
