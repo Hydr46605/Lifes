@@ -57,7 +57,8 @@ Requires PlaceholderAPI. All of them resolve for offline players with a known ac
 - `death.ignored-causes` skips deaths matching an `EntityDamageEvent.DamageCause` name.
 - `death.actions` runs on every death that costs a life. `exhaustion.actions` runs when lives reach zero, and `PERMABAN` is the default exit there.
 - `exhaustion.on-zero-lives-join` covers an account that connects while already at zero lives, which is what happens after an admin lifts a ban: `REAPPLY` runs the exit pipeline again, `KICK` only removes the session, `IGNORE` lets them play on.
-- Actions are ordered and typed: `MESSAGE`, `SOUND`, `COMMAND`, `PERMABAN`.
+- Actions are ordered and typed: `MESSAGE`, `SOUND`, `COMMAND`, `PERMABAN`, `DISCORD`.
+- `DISCORD` posts a raw Discord JSON payload to a webhook, so deaths and eliminations can land in different channels. The payload is validated at load, placeholders are JSON-escaped, and delivery retries rate limits without ever stalling the server.
 - `saves.yml` is written atomically and off the main thread. Any damage, at the root or inside a single entry, is preserved as `saves.yml.broken-<timestamp>` and aborts startup instead of dropping accounts or resetting data.
 
 ## Building

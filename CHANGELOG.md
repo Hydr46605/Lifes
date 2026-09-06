@@ -4,6 +4,13 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-06
+
+### Added
+
+- `DISCORD` death/exhaustion action: posts an administrator-owned Discord JSON payload (Components V2 included) to a webhook, with `{player}` `{uuid}` `{lives}` `{maximum}` `{deaths}` `{reason}` `{delta}` substituted as JSON-escaped strings. Webhook URLs are validated at load (https, Discord hosts, `/api/webhooks/<id>/<token>` shape), unknown option keys fail with the exact path, and delivery runs on a bounded worker that retries 429/5xx, honours `retry_after`, and drains briefly on shutdown. No new dependencies.
+- Unknown option keys on any action type now fail startup with the exact configuration path, so a misspelled setting can no longer sit there doing nothing.
+
 ## [0.1.2] - 2026-09-05
 
 ### Fixed
@@ -44,6 +51,8 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - Bukkit `LifeChangeEvent` for integrations; domain listeners for internal reactions.
 - Hermetic build: checksum-pinned Gradle, `-Werror`, SemVer validation, CI on Linux and Windows, release automation for `v` tags.
 
-[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.0
+[0.1.2]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.2
 [0.1.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.0
