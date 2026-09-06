@@ -14,7 +14,17 @@ death:
   # Valid names: https://jd.papermc.io/paper/1.21/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
   ignored-causes: []
   # Runs in order after every counted death.
-  # Types: MESSAGE, SOUND, COMMAND, PERMABAN
+  # Types: MESSAGE, SOUND, COMMAND, PERMABAN, DISCORD
+  # A DISCORD entry posts a raw Discord JSON payload to a webhook. The payload supports
+  # {player} {uuid} {lives} {maximum} {deaths} {reason} {delta}, substituted as JSON-escaped
+  # strings, and reaches Discord exactly as written (Components V2 included):
+  #   - type: DISCORD
+  #     webhook: "https://discord.com/api/webhooks/<numeric id>/<token>"
+  #     payload: |
+  #       {
+  #         "username": "Lifes",
+  #         "content": "**{player}** died. {lives} lives left."
+  #       }
   actions:
     - type: MESSAGE
       target: VICTIM          # VICTIM or BROADCAST

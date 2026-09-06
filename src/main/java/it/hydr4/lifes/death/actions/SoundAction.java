@@ -22,6 +22,7 @@ public final class SoundAction implements LifesAction {
     }
 
     public static SoundAction from(DeathActionSpec spec) {
+        spec.requireKeys("sound", "volume", "pitch");
         var name = spec.requiredString("sound");
         var sound = resolve(name);
         if (sound == null) {

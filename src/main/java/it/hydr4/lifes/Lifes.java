@@ -6,6 +6,8 @@ import it.hydr4.lifes.command.suggest.PlayerNameIndex;
 import it.hydr4.lifes.core.AccountDirectory;
 import it.hydr4.lifes.core.DefaultLivesService;
 import it.hydr4.lifes.death.ActionRunner;
+import it.hydr4.lifes.discord.DiscordGateway;
+import it.hydr4.lifes.discord.HttpDiscordTransport;
 import it.hydr4.lifes.hook.PlaceholderApiHook;
 import it.hydr4.lifes.paper.AdminChangeNotifier;
 import it.hydr4.lifes.paper.BukkitEventBridge;
@@ -29,13 +31,19 @@ public final class Lifes extends JavaPlugin {
     private AsyncSaveQueue saveQueue;
     private CommandWiring commandWiring;
     private PlaceholderApiHook placeholderHook;
+    private DiscordGateway discord;
 
     @Override
     public void onEnable() {
         saveResourceIfAbsent("settings.yml");
+        // Created before the runtime because building the action pipelines needs it, and closed
+        // again below if the configuration turns out to be unusable.
+        discord = new DiscordGateway(new HttpDiscordTransport(), getLogger(), DiscordGateway.DEFAULT_RETRIES);
         try {
-            runtime = LifesRuntime.load(new File(getDataFolder(), "settings.yml").toPath());
+            runtime = LifesRuntime.load(new File(getDataFolder(), "settings.yml").toPath(), discord);
         } catch (ConfigException exception) {
+            discord.close();
+            discord = null;
             getLogger().severe(exception.getMessage());
             getLogger().severe("Fix settings.yml and restart or use /lives reload once the file is valid.");
             return;
@@ -48,6 +56,8 @@ public final class Lifes extends JavaPlugin {
         } catch (ConfigException exception) {
             getLogger().severe(exception.getMessage());
             getLogger().severe("Lifes stays disabled to protect the saved data; resolve the file above first.");
+            discord.close();
+            discord = null;
             return;
         }
 
@@ -81,6 +91,10 @@ public final class Lifes extends JavaPlugin {
             commandWiring = CommandWiring.register(this, runtime, service, directory, names);
         } catch (RuntimeException exception) {
             getLogger().severe("Registering commands failed: " + exception.getMessage());
+            saveQueue.close();
+            saveQueue = null;
+            discord.close();
+            discord = null;
             return;
         }
 
@@ -101,6 +115,10 @@ public final class Lifes extends JavaPlugin {
         if (saveQueue != null) {
             saveQueue.close();
             saveQueue = null;
+        }
+        if (discord != null) {
+            discord.close();
+            discord = null;
         }
     }
 

@@ -20,6 +20,7 @@ public final class MessageAction implements LifesAction {
     }
 
     public static MessageAction from(DeathActionSpec spec) {
+        spec.requireKeys("target", "message");
         var target = Target.valueOf(spec.optionalChoice("target", Target.VICTIM.name(), Target.names()).toUpperCase(Locale.ROOT));
         return new MessageAction(target, spec.requiredString("message"));
     }

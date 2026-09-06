@@ -4,6 +4,7 @@ import it.hydr4.lifes.config.LivesSettings;
 import it.hydr4.lifes.config.SettingsParser;
 import it.hydr4.lifes.death.ActionSets;
 import it.hydr4.lifes.death.ActionSetsBuilder;
+import it.hydr4.lifes.discord.DiscordGateway;
 import it.hydr4.lifes.text.Messages;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -14,24 +15,31 @@ import java.util.concurrent.atomic.AtomicReference;
 /** Reloadable state; reloads swap settings, messages and actions atomically. */
 public final class LifesRuntime {
     private final Path settingsFile;
+    private final DiscordGateway discord;
     private final AtomicReference<Snapshot> snapshot;
 
     private record Snapshot(LivesSettings settings, Messages messages, ActionSets actions) {
     }
 
-    private LifesRuntime(Path settingsFile, Snapshot initial) {
+    private LifesRuntime(Path settingsFile, DiscordGateway discord, Snapshot initial) {
         this.settingsFile = settingsFile;
+        this.discord = discord;
         this.snapshot = new AtomicReference<>(initial);
     }
 
-    /** Loads and fully validates the runtime from disk. */
-    public static LifesRuntime load(Path settingsFile) {
-        return new LifesRuntime(settingsFile, buildSnapshot(settingsFile));
+    /**
+     * Loads and fully validates the runtime from disk.
+     *
+     * <p>The gateway is supplied rather than built here: it owns a worker thread, and a reload must
+     * re-read configuration without restarting delivery mid-flight.
+     */
+    public static LifesRuntime load(Path settingsFile, DiscordGateway discord) {
+        return new LifesRuntime(settingsFile, discord, buildSnapshot(settingsFile, discord));
     }
 
     /** Re-parses, validates and atomically swaps the runtime. */
     public void reload() {
-        snapshot.set(buildSnapshot(settingsFile));
+        snapshot.set(buildSnapshot(settingsFile, discord));
     }
 
     public LivesSettings settings() {
@@ -50,13 +58,13 @@ public final class LifesRuntime {
         return settings().maximumLives();
     }
 
-    private static Snapshot buildSnapshot(Path settingsFile) {
+    private static Snapshot buildSnapshot(Path settingsFile, DiscordGateway discord) {
         var settings = SettingsParser.parse(settingsFile);
         validateCauses(settings);
         return new Snapshot(
             settings,
             new Messages(settings.messages()),
-            ActionSetsBuilder.build(settings)
+            ActionSetsBuilder.build(settings, discord)
         );
     }
 

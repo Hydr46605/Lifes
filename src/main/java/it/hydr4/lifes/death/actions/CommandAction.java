@@ -15,6 +15,7 @@ public final class CommandAction implements LifesAction {
     }
 
     public static CommandAction from(DeathActionSpec spec) {
+        spec.requireKeys("command");
         return new CommandAction(spec.requiredString("command"));
     }
 

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.hydr4.lifes.discord.OfflineGateway;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,7 +48,7 @@ class LifesRuntimeTest {
 
     @Test
     void loadsValidSettings() throws IOException {
-        var runtime = LifesRuntime.load(write(VALID));
+        var runtime = LifesRuntime.load(write(VALID), OfflineGateway.create());
         assertEquals(10, runtime.maximumLives());
         assertEquals(2, runtime.settings().ignoredDeathCauses().size());
         assertEquals(1, runtime.settings().deathActions().size());
@@ -56,14 +57,14 @@ class LifesRuntimeTest {
     @Test
     void unknownDamageCauseFailsWithTheCauseName() throws IOException {
         var broken = VALID.replace("- VOID", "- NOT_A_CAUSE");
-        var exception = assertThrows(ConfigException.class, () -> LifesRuntime.load(write(broken)));
+        var exception = assertThrows(ConfigException.class, () -> LifesRuntime.load(write(broken), OfflineGateway.create()));
         assertTrue(exception.getMessage().contains("NOT_A_CAUSE"), exception.getMessage());
     }
 
     @Test
     void reloadPicksUpNewMaximum() throws IOException {
         var file = write(VALID);
-        var runtime = LifesRuntime.load(file);
+        var runtime = LifesRuntime.load(file, OfflineGateway.create());
         Files.writeString(file, VALID.replace("maximum: 10", "maximum: 15"));
         runtime.reload();
         assertEquals(15, runtime.maximumLives());
@@ -72,7 +73,7 @@ class LifesRuntimeTest {
     @Test
     void failedReloadKeepsThePreviousSnapshot() throws IOException {
         var file = write(VALID);
-        var runtime = LifesRuntime.load(file);
+        var runtime = LifesRuntime.load(file, OfflineGateway.create());
         Files.writeString(file, "garbage: [");
         assertThrows(ConfigException.class, runtime::reload);
         assertEquals(10, runtime.maximumLives());
@@ -80,7 +81,7 @@ class LifesRuntimeTest {
 
     @Test
     void missingFileFailsWithThePath() {
-        var exception = assertThrows(ConfigException.class, () -> LifesRuntime.load(dir.resolve("nope.yml")));
+        var exception = assertThrows(ConfigException.class, () -> LifesRuntime.load(dir.resolve("nope.yml"), OfflineGateway.create()));
         assertTrue(exception.getMessage().contains("nope.yml"), exception.getMessage());
     }
 }

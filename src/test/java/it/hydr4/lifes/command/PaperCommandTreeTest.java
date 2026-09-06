@@ -16,6 +16,7 @@ import it.hydr4.lifes.command.suggest.PlayerNameIndex;
 import it.hydr4.lifes.command.suggest.SuggestionKeys;
 import it.hydr4.lifes.core.AccountDirectory;
 import it.hydr4.lifes.core.DefaultLivesService;
+import it.hydr4.lifes.discord.OfflineGateway;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
@@ -74,7 +75,7 @@ class PaperCommandTreeTest {
     void setUp() throws IOException {
         var file = dir.resolve("settings.yml");
         Files.writeString(file, SETTINGS);
-        var runtime = LifesRuntime.load(file);
+        var runtime = LifesRuntime.load(file, OfflineGateway.create());
         var directory = new AccountDirectory();
         var service = new DefaultLivesService(directory, runtime::settings);
         service.create(UUID.randomUUID(), "Hydr4");

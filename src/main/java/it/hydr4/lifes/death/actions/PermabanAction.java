@@ -17,6 +17,7 @@ public final class PermabanAction implements LifesAction {
     }
 
     public static PermabanAction from(DeathActionSpec spec) {
+        spec.requireKeys("reason");
         return new PermabanAction(spec.optionalString("reason", "You have run out of lives."));
     }
 

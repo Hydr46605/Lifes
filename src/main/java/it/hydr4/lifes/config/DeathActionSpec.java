@@ -48,6 +48,24 @@ public record DeathActionSpec(String type, Map<String, Object> options, String p
         return value;
     }
 
+    /**
+     * Rejects option keys the action type never reads, so a misspelled setting cannot sit there
+     * doing nothing. The first unknown key in alphabetical order is reported, which keeps the
+     * message stable across runs.
+     */
+    public void requireKeys(String... allowed) {
+        var known = List.of(allowed);
+        var unknown = new java.util.TreeSet<>(options.keySet());
+        unknown.removeAll(known);
+        if (!unknown.isEmpty()) {
+            var first = unknown.first();
+            throw new it.hydr4.lifes.ConfigException(
+                path(first),
+                "unknown option for action type " + type + "; " + type + " accepts " + known
+            );
+        }
+    }
+
     private double asDouble(Object value, String key) {
         if (value instanceof Number number) {
             return number.doubleValue();

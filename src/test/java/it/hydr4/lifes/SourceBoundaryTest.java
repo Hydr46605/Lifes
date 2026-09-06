@@ -57,4 +57,21 @@ class SourceBoundaryTest {
             }
         }
     }
+
+    @Test
+    void discordDeliveryMustNotTouchBukkit() throws IOException {
+        // Discord delivery happens on a worker thread. If that thread ever read a Player it would
+        // either throw or corrupt state, so the action hands over an immutable snapshot and nothing
+        // below it is allowed to reach back into the server API.
+        var root = Path.of("src", "main", "java", "it", "hydr4", "lifes", "discord");
+        assertTrue(Files.isDirectory(root), "run from the project root");
+        try (Stream<Path> sources = Files.walk(root)) {
+            for (var file : sources.filter(p -> p.toString().endsWith(".java")).toList()) {
+                var content = Files.readString(file);
+                for (var banned : BUKKIT) {
+                    assertTrue(!content.contains(banned), file + " must not reference " + banned);
+                }
+            }
+        }
+    }
 }

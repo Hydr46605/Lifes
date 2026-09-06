@@ -11,6 +11,7 @@ import it.hydr4.democracy.testkit.CommandTestSource;
 import it.hydr4.lifes.LifesRuntime;
 import it.hydr4.lifes.core.AccountDirectory;
 import it.hydr4.lifes.core.DefaultLivesService;
+import it.hydr4.lifes.discord.OfflineGateway;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,7 @@ class LivesCommandTest {
     void setUp() throws IOException {
         var file = dir.resolve("settings.yml");
         Files.writeString(file, SETTINGS);
-        var runtime = LifesRuntime.load(file);
+        var runtime = LifesRuntime.load(file, OfflineGateway.create());
         directory = new AccountDirectory();
         service = new DefaultLivesService(directory, runtime::settings);
         harness = new CommandTestHarness();
