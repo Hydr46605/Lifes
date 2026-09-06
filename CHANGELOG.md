@@ -4,6 +4,12 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-06
+
+### Fixed
+
+- `DISCORD` actions with a components-only payload (Components V2, no `content`) were rejected by Discord with `400 "Cannot send an empty message"`: webhooks only honour `components` when the URL carries `?with_components=true`, and the plugin was stripping the query string off the webhook address. Query strings are now preserved end to end (the token still never reaches the logs), so append `?with_components=true` to the webhook URL when the payload has no `content`. Verified against a live webhook: the same embed fails with 400 on the bare URL and lands with 204 once the flag is present.
+
 ## [0.2.0] - 2026-09-06
 
 ### Added
@@ -51,7 +57,8 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - Bukkit `LifeChangeEvent` for integrations; domain listeners for internal reactions.
 - Hermetic build: checksum-pinned Gradle, `-Werror`, SemVer validation, CI on Linux and Windows, release automation for `v` tags.
 
-[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.0
 [0.1.2]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.2
 [0.1.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.1
