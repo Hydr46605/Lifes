@@ -7,6 +7,8 @@ author: Hydr4
 website: https://github.com/Hydr46605/Lifes
 softdepend:
   - PlaceholderAPI
+  - Skript
+  - UltimateUI
 permissions:
   lifes.command.check.self:
     description: Check your own lives

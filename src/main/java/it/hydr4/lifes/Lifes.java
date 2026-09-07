@@ -9,6 +9,8 @@ import it.hydr4.lifes.death.ActionRunner;
 import it.hydr4.lifes.discord.DiscordGateway;
 import it.hydr4.lifes.discord.HttpDiscordTransport;
 import it.hydr4.lifes.hook.PlaceholderApiHook;
+import it.hydr4.lifes.hook.SkriptHook;
+import it.hydr4.lifes.hook.UltimateUiHook;
 import it.hydr4.lifes.paper.AdminChangeNotifier;
 import it.hydr4.lifes.paper.BukkitEventBridge;
 import it.hydr4.lifes.paper.DeathListener;
@@ -31,6 +33,8 @@ public final class Lifes extends JavaPlugin {
     private AsyncSaveQueue saveQueue;
     private CommandWiring commandWiring;
     private PlaceholderApiHook placeholderHook;
+    private SkriptHook skriptHook;
+    private UltimateUiHook ultimateUiHook;
     private DiscordGateway discord;
 
     @Override
@@ -99,11 +103,21 @@ public final class Lifes extends JavaPlugin {
         }
 
         placeholderHook = PlaceholderApiHook.tryAttach(runtime, service, this).orElse(null);
+        skriptHook = SkriptHook.tryAttach(service, this).orElse(null);
+        ultimateUiHook = UltimateUiHook.tryAttach(this).orElse(null);
         getLogger().info("Enabled v" + getPluginMeta().getVersion());
     }
 
     @Override
     public void onDisable() {
+        if (ultimateUiHook != null) {
+            ultimateUiHook.close();
+            ultimateUiHook = null;
+        }
+        if (skriptHook != null) {
+            skriptHook.close();
+            skriptHook = null;
+        }
         if (placeholderHook != null) {
             placeholderHook.close();
             placeholderHook = null;

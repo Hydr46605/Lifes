@@ -50,6 +50,18 @@ exhaustion:
   # IGNORE lets them play on. Values other than these three fail startup.
   on-zero-lives-join: REAPPLY
 
+gain:
+  # Runs in order after any life gain that does not leave zero (admin add, reward).
+  # Types: MESSAGE, SOUND, COMMAND, PERMABAN, DISCORD
+  # Placeholders: {player} {lives} {delta} {before} {reason} plus {uuid} {maximum}.
+  actions: []
+
+resurrect:
+  # Runs in order when a gain leaves zero lives (before.lives == 0, delta > 0).
+  # Types: MESSAGE, SOUND, COMMAND, PERMABAN, DISCORD
+  # Placeholders: {player} {lives} {delta} {before} {reason} plus {uuid} {maximum}.
+  actions: []
+
 persistence:
   # Seconds between periodic saves; 0 disables. Every change also saves.
   save-interval-seconds: 300

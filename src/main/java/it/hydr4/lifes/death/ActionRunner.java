@@ -33,6 +33,12 @@ public final class ActionRunner implements LivesListener {
             // A death that finds the account already at zero lives re-runs the exit pipeline, so a
             // lifted ban or a crash between the save and the ban cannot leave a dead account playing.
             run(sets.exhaustion(), change);
+        } else if (change.delta() < 0) {
+            run(sets.death(), change);
+        } else if (change.delta() > 0 && change.before().lives() == 0) {
+            run(sets.resurrect(), change);
+        } else if (change.delta() > 0) {
+            run(sets.gain(), change);
         } else if (change.reason() == LifeChangeReason.DEATH) {
             run(sets.death(), change);
         }

@@ -21,9 +21,10 @@ import java.util.Set;
 
 /** Parses settings.yml; any deviation fails with the exact config path. */
 public final class SettingsParser {
-    private static final Set<String> ROOT_KEYS = Set.of("version", "lives", "death", "exhaustion", "persistence", "messages");
+    private static final Set<String> ROOT_KEYS = Set.of("version", "lives", "death", "exhaustion", "gain", "resurrect", "persistence", "messages");
     private static final Set<String> LIVES_KEYS = Set.of("default", "maximum");
     private static final Set<String> DEATH_KEYS = Set.of("cost-per-death", "ignored-causes", "actions");
+    private static final Set<String> SIMPLE_ACTIONS_KEYS = Set.of("actions");
     private static final Set<String> EXHAUSTION_KEYS = Set.of("actions", "on-zero-lives-join");
     private static final Set<String> PERSISTENCE_KEYS = Set.of("save-interval-seconds", "save-off-thread");
     private static final int FORMAT_VERSION = 1;
@@ -56,6 +57,9 @@ public final class SettingsParser {
         var exhaustionActions = actions(exhaustion, "actions", path(filePath, "exhaustion"));
         var zeroLivesJoin = optionalEnum(exhaustion, "on-zero-lives-join", ZeroLivesJoin.class, ZeroLivesJoin.REAPPLY, path(filePath, "exhaustion"));
 
+        var gainActions = optionalActions(root, "gain", filePath);
+        var resurrectActions = optionalActions(root, "resurrect", filePath);
+
         var persistence = section(root, "persistence", filePath);
         expectKeys(persistence, PERSISTENCE_KEYS, path(filePath, "persistence"));
         var saveInterval = integer(persistence, "save-interval-seconds", 0, 86_400, path(filePath, "persistence"));
@@ -69,6 +73,8 @@ public final class SettingsParser {
             ignoredCauses,
             deathActions,
             exhaustionActions,
+            gainActions,
+            resurrectActions,
             zeroLivesJoin,
             saveInterval,
             saveOffThread,
@@ -160,6 +166,18 @@ public final class SettingsParser {
             causes.add(name);
         }
         return Set.copyOf(causes);
+    }
+
+    private static List<DeathActionSpec> optionalActions(Map<?, ?> root, String key, String filePath) {
+        var value = root.get(key);
+        if (value == null) {
+            return List.of();
+        }
+        if (!(value instanceof Map<?, ?> map)) {
+            throw new ConfigException(path(filePath, key), "expected a mapping section");
+        }
+        expectKeys(map, SIMPLE_ACTIONS_KEYS, path(filePath, key));
+        return actions(map, "actions", path(filePath, key));
     }
 
     private static List<DeathActionSpec> actions(Map<?, ?> section, String key, String sectionPath) {

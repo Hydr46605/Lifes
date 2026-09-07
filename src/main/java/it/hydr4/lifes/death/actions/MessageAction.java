@@ -32,7 +32,10 @@ public final class MessageAction implements LifesAction {
             "player", change.after().name(),
             "uuid", change.after().uuid().toString(),
             "lives", change.after().lives(),
-            "maximum", context.maximumLives()
+            "maximum", context.maximumLives(),
+            "delta", change.delta(),
+            "before", change.before().lives(),
+            "reason", change.reason().name()
         ));
         switch (target) {
             case VICTIM -> {

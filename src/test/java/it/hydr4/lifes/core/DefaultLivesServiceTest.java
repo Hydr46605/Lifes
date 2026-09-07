@@ -25,7 +25,7 @@ class DefaultLivesServiceTest {
     }
 
     private static LivesSettings settings() {
-        return new LivesSettings(3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, MessageTemplates.withOverrides(Map.of()));
+        return new LivesSettings(3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, MessageTemplates.withOverrides(Map.of()));
     }
 
     @Test

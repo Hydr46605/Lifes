@@ -25,7 +25,9 @@ public final class ActionSetsBuilder {
     public static ActionSets build(LivesSettings settings, DiscordGateway gateway) {
         return new ActionSets(
             convert(settings.deathActions(), gateway),
-            convert(settings.exhaustionActions(), gateway)
+            convert(settings.exhaustionActions(), gateway),
+            convert(settings.gainActions(), gateway),
+            convert(settings.resurrectActions(), gateway)
         );
     }
 

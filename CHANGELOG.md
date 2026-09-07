@@ -4,6 +4,15 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-07
+
+### Added
+
+- `gain` and `resurrect` action pipelines in `settings.yml`: `gain` runs on any life gain that does not leave zero lives, `resurrect` runs only when a gain leaves zero (`before.lives == 0`, `delta > 0`). Both sections mirror `death` (`actions` with `MESSAGE`, `SOUND`, `COMMAND`, `PERMABAN`, `DISCORD`), are optional for backward compatibility, and fail startup with the exact `gain.actions[N].<key>` / `resurrect.actions[N].<key>` path on invalid input.
+- Standardized placeholders across `MESSAGE`, `COMMAND` and `DISCORD` actions: every pipeline now uniformly provides `{delta}` `{before}` `{reason}` in addition to `{player}` `{lives}` (plus the existing `{uuid}` `{maximum}`, and `{deaths}` on Discord).
+- Skript hook with no compile-time dependency and no breaking changes: the running `LivesService` is published to the Bukkit `ServicesManager` and to the static `it.hydr4.lifes.hook.LifesSkript` entry point (usable via skript-reflect: find, create, applyDeath, adjust, listeners), and `LifeChangeEvent` fires as a regular Bukkit event for scripts. No-op when Skript is absent.
+- UltimateUI hook pinned to the investigated build (embedded `plugin.yml` `1.2.1`, `dev.xqedii.ultimateUI.api.UltimateUIAPI`): pure-reflection `UltimateUiHook` that verifies the exact API shape (`openGui`/`closeGui`/`setElementText`/`getOpenGuiName`) before attaching and refuses with a warning on any mismatch, so other UltimateUI versions can never break. No-op when UltimateUI is absent.
+
 ## [0.2.1] - 2026-09-06
 
 ### Fixed
@@ -57,7 +66,8 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - Bukkit `LifeChangeEvent` for integrations; domain listeners for internal reactions.
 - Hermetic build: checksum-pinned Gradle, `-Werror`, SemVer validation, CI on Linux and Windows, release automation for `v` tags.
 
-[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.3.0
 [0.2.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.0
 [0.1.2]: https://github.com/Hydr46605/Lifes/releases/tag/v0.1.2

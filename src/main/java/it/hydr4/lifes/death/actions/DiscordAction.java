@@ -48,7 +48,8 @@ public final class DiscordAction implements LifesAction {
             "maximum", context.maximumLives(),
             "deaths", account.totalDeaths(),
             "reason", change.reason().name(),
-            "delta", change.delta()
+            "delta", change.delta(),
+            "before", change.before().lives()
         ));
         gateway.submit(new DiscordMessage(endpoint, body, account.name()));
     }

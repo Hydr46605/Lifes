@@ -23,6 +23,8 @@ class ActionSetsBuilderTest {
             3, 10, 1, java.util.Set.of(),
             List.of(new DeathActionSpec("MESSAGE", Map.of("target", "BROADCAST", "message", "died"), "death.actions[0]")),
             List.of(new DeathActionSpec("PERMABAN", Map.of(), "exhaustion.actions[0]")),
+            List.of(),
+            List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var sets = ActionSetsBuilder.build(settings, OfflineGateway.create());
         assertEquals(1, sets.death().size());
@@ -37,6 +39,8 @@ class ActionSetsBuilderTest {
             3, 10, 1, java.util.Set.of(),
             List.of(new DeathActionSpec("EXPLODE", Map.of(), "death.actions[0]")),
             List.of(),
+            List.of(),
+            List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertEquals(
@@ -49,6 +53,8 @@ class ActionSetsBuilderTest {
         var settings = new LivesSettings(
             3, 10, 1, java.util.Set.of(),
             List.of(new DeathActionSpec("MESSAGE", Map.of(), "death.actions[0]")),
+            List.of(),
+            List.of(),
             List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
@@ -63,6 +69,8 @@ class ActionSetsBuilderTest {
                 Map.of("webhook", "https://discord.com/api/webhooks/1234567890123456789/secret-token",
                     "payload", "{\"content\": \"{player} died\"}"),
                 "death.actions[0]")),
+            List.of(),
+            List.of(),
             List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var sets = ActionSetsBuilder.build(settings, OfflineGateway.create());
@@ -79,6 +87,8 @@ class ActionSetsBuilderTest {
                     "payload", "{\"content\": \"{player} died\"}"),
                 "death.actions[0]")),
             List.of(),
+            List.of(),
+            List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertTrue(exception.getMessage().startsWith("death.actions[0].webhook: host must be one of"),
@@ -93,6 +103,8 @@ class ActionSetsBuilderTest {
                 Map.of("webhook", "https://discord.com/api/webhooks/1234567890123456789/secret-token",
                     "payload", "[\"not\", \"an object\"]"),
                 "death.actions[0]")),
+            List.of(),
+            List.of(),
             List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
@@ -109,6 +121,8 @@ class ActionSetsBuilderTest {
                     "payload", "{\"content\": \"{player} died\"}",
                     "usernam", "Lifes"),
                 "death.actions[0]")),
+            List.of(),
+            List.of(),
             List.of(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));

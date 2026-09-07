@@ -13,6 +13,8 @@ public record LivesSettings(
     Set<String> ignoredDeathCauses,
     List<DeathActionSpec> deathActions,
     List<DeathActionSpec> exhaustionActions,
+    List<DeathActionSpec> gainActions,
+    List<DeathActionSpec> resurrectActions,
     ZeroLivesJoin zeroLivesJoin,
     int saveIntervalSeconds,
     boolean saveOffThread,
@@ -22,5 +24,7 @@ public record LivesSettings(
         ignoredDeathCauses = Set.copyOf(ignoredDeathCauses);
         deathActions = List.copyOf(deathActions);
         exhaustionActions = List.copyOf(exhaustionActions);
+        gainActions = List.copyOf(gainActions);
+        resurrectActions = List.copyOf(resurrectActions);
     }
 }
