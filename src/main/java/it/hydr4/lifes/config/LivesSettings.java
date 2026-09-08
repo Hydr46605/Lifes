@@ -15,6 +15,7 @@ public record LivesSettings(
     List<DeathActionSpec> exhaustionActions,
     List<DeathActionSpec> gainActions,
     List<DeathActionSpec> resurrectActions,
+    UltimateUiSettings ultimateUi,
     ZeroLivesJoin zeroLivesJoin,
     int saveIntervalSeconds,
     boolean saveOffThread,

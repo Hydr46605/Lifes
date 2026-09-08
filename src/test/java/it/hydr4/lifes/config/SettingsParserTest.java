@@ -158,6 +158,49 @@ class SettingsParserTest {
     }
 
     @Test
+    void ultimateUiRefreshDefaultsToDisabled() throws IOException {
+        var settings = SettingsParser.parse(write(VALID));
+        assertTrue(!settings.ultimateUi().enabled());
+    }
+
+    @Test
+    void ultimateUiRefreshParsesWhenConfigured() throws IOException {
+        var content = VALID.replace("persistence:",
+            """
+            ultimateui:
+              refresh-gui: "lives-hud"
+              refresh-element: "lives-text"
+              refresh-text: "{lives} left"
+            persistence:""");
+        var settings = SettingsParser.parse(write(content));
+        assertTrue(settings.ultimateUi().enabled());
+        assertEquals("lives-hud", settings.ultimateUi().refreshGui());
+        assertEquals("{lives} left", settings.ultimateUi().refreshText());
+    }
+
+    @Test
+    void ultimateUiRefreshNeedsBothGuiAndElement() throws IOException {
+        var content = VALID.replace("persistence:",
+            """
+            ultimateui:
+              refresh-gui: "lives-hud"
+            persistence:""");
+        var exception = assertThrows(ConfigException.class, () -> SettingsParser.parse(write(content)));
+        assertTrue(exception.getMessage().contains("ultimateui.refresh-element"), exception.getMessage());
+    }
+
+    @Test
+    void unknownUltimateUiKeyFailsWithPath() throws IOException {
+        var content = VALID.replace("persistence:",
+            """
+            ultimateui:
+              refresh-guii: "lives-hud"
+            persistence:""");
+        var exception = assertThrows(ConfigException.class, () -> SettingsParser.parse(write(content)));
+        assertTrue(exception.getMessage().contains("ultimateui.refresh-guii"), exception.getMessage());
+    }
+
+    @Test
     void loadReportsTheSourcePath() throws IOException {
         var file = write("version: 1");
         var exception = assertThrows(ConfigException.class, () -> SettingsParser.parse(file));

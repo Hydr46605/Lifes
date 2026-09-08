@@ -21,9 +21,10 @@ import java.util.Set;
 
 /** Parses settings.yml; any deviation fails with the exact config path. */
 public final class SettingsParser {
-    private static final Set<String> ROOT_KEYS = Set.of("version", "lives", "death", "exhaustion", "gain", "resurrect", "persistence", "messages");
+    private static final Set<String> ROOT_KEYS = Set.of("version", "lives", "death", "exhaustion", "gain", "resurrect", "ultimateui", "persistence", "messages");
     private static final Set<String> LIVES_KEYS = Set.of("default", "maximum");
     private static final Set<String> DEATH_KEYS = Set.of("cost-per-death", "ignored-causes", "actions");
+    private static final Set<String> ULTIMATEUI_KEYS = Set.of("refresh-gui", "refresh-element", "refresh-text");
     private static final Set<String> SIMPLE_ACTIONS_KEYS = Set.of("actions");
     private static final Set<String> EXHAUSTION_KEYS = Set.of("actions", "on-zero-lives-join");
     private static final Set<String> PERSISTENCE_KEYS = Set.of("save-interval-seconds", "save-off-thread");
@@ -59,6 +60,7 @@ public final class SettingsParser {
 
         var gainActions = optionalActions(root, "gain", filePath);
         var resurrectActions = optionalActions(root, "resurrect", filePath);
+        var ultimateUi = ultimateUi(root, filePath);
 
         var persistence = section(root, "persistence", filePath);
         expectKeys(persistence, PERSISTENCE_KEYS, path(filePath, "persistence"));
@@ -75,6 +77,7 @@ public final class SettingsParser {
             exhaustionActions,
             gainActions,
             resurrectActions,
+            ultimateUi,
             zeroLivesJoin,
             saveInterval,
             saveOffThread,
@@ -166,6 +169,39 @@ public final class SettingsParser {
             causes.add(name);
         }
         return Set.copyOf(causes);
+    }
+
+    private static UltimateUiSettings ultimateUi(Map<?, ?> root, String filePath) {
+        var value = root.get("ultimateui");
+        if (value == null) {
+            return UltimateUiSettings.disabled();
+        }
+        if (!(value instanceof Map<?, ?> map)) {
+            throw new ConfigException(path(filePath, "ultimateui"), "expected a mapping section");
+        }
+        expectKeys(map, ULTIMATEUI_KEYS, path(filePath, "ultimateui"));
+        var gui = text(map, "refresh-gui", "", path(filePath, "ultimateui"));
+        var element = text(map, "refresh-element", "", path(filePath, "ultimateui"));
+        var template = text(map, "refresh-text", "{lives}", path(filePath, "ultimateui"));
+        if (gui.isBlank() != element.isBlank()) {
+            throw new ConfigException(path(filePath, "ultimateui.refresh-element"),
+                "refresh-gui and refresh-element must either both be set or both be blank");
+        }
+        if (template.isBlank()) {
+            throw new ConfigException(path(filePath, "ultimateui.refresh-text"), "expected a non-blank string");
+        }
+        return new UltimateUiSettings(gui, element, template);
+    }
+
+    private static String text(Map<?, ?> section, String key, String fallback, String sectionPath) {
+        var value = section.get(key);
+        if (value == null) {
+            return fallback;
+        }
+        if (!(value instanceof String text)) {
+            throw new ConfigException(path(sectionPath, key), "expected a string, got " + typeName(value));
+        }
+        return text;
     }
 
     private static List<DeathActionSpec> optionalActions(Map<?, ?> root, String key, String filePath) {

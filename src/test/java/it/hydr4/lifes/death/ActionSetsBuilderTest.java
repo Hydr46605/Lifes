@@ -25,12 +25,27 @@ class ActionSetsBuilderTest {
             List.of(new DeathActionSpec("PERMABAN", Map.of(), "exhaustion.actions[0]")),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var sets = ActionSetsBuilder.build(settings, OfflineGateway.create());
         assertEquals(1, sets.death().size());
         assertInstanceOf(MessageAction.class, sets.death().get(0));
         assertEquals(1, sets.exhaustion().size());
         assertInstanceOf(PermabanAction.class, sets.exhaustion().get(0));
+    }
+
+    @Test
+    void ultimateUiActionsNeedTheHook() {
+        var settings = new LivesSettings(
+            3, 10, 1, java.util.Set.of(),
+            List.of(new DeathActionSpec("ULTIMATEUI_OPEN", Map.of("gui", "lives-hud"), "death.actions[0]")),
+            List.of(),
+            List.of(),
+            List.of(),
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(),
+            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+        var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
+        assertEquals("death.actions[0]: ULTIMATEUI_OPEN action needs UltimateUI, but it is not attached",
+            exception.getMessage());
     }
 
     @Test
@@ -41,10 +56,10 @@ class ActionSetsBuilderTest {
             List.of(),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertEquals(
-            "death.actions[0]: unknown action type 'EXPLODE'; expected MESSAGE, SOUND, COMMAND, PERMABAN or DISCORD",
+            "death.actions[0]: unknown action type 'EXPLODE'; expected MESSAGE, SOUND, COMMAND, PERMABAN, DISCORD, ULTIMATEUI_OPEN, ULTIMATEUI_CLOSE or ULTIMATEUI_SET",
             exception.getMessage());
     }
 
@@ -56,7 +71,7 @@ class ActionSetsBuilderTest {
             List.of(),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertEquals("death.actions[0].message: expected a non-blank string", exception.getMessage());
     }
@@ -72,7 +87,7 @@ class ActionSetsBuilderTest {
             List.of(),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var sets = ActionSetsBuilder.build(settings, OfflineGateway.create());
         assertEquals(1, sets.death().size());
         assertInstanceOf(DiscordAction.class, sets.death().get(0));
@@ -89,7 +104,7 @@ class ActionSetsBuilderTest {
             List.of(),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertTrue(exception.getMessage().startsWith("death.actions[0].webhook: host must be one of"),
             exception.getMessage());
@@ -106,7 +121,7 @@ class ActionSetsBuilderTest {
             List.of(),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertEquals("death.actions[0].payload: expected a JSON object, found a JSON array",
             exception.getMessage());
@@ -124,7 +139,7 @@ class ActionSetsBuilderTest {
             List.of(),
             List.of(),
             List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true, null);
         var exception = assertThrows(ConfigException.class, () -> ActionSetsBuilder.build(settings, OfflineGateway.create()));
         assertTrue(exception.getMessage().startsWith("death.actions[0].usernam: unknown option"),
             exception.getMessage());

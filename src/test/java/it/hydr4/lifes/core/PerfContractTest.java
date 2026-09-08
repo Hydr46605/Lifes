@@ -55,7 +55,7 @@ class PerfContractTest {
     private static it.hydr4.lifes.config.LivesSettings settings() {
         return new it.hydr4.lifes.config.LivesSettings(
             3, 100_000, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(),
-            it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true,
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(), it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true,
             it.hydr4.lifes.text.MessageTemplates.withOverrides(Map.of()));
     }
 }

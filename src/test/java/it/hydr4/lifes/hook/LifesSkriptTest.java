@@ -21,6 +21,7 @@ class LifesSkriptTest {
         var service = new DefaultLivesService(directory, () -> new it.hydr4.lifes.config.LivesSettings(
             3, 10, 1, java.util.Set.of(), java.util.List.of(), java.util.List.of(),
             java.util.List.of(), java.util.List.of(),
+            it.hydr4.lifes.config.UltimateUiSettings.disabled(),
             it.hydr4.lifes.config.ZeroLivesJoin.REAPPLY, 0, true,
             it.hydr4.lifes.text.MessageTemplates.withOverrides(java.util.Map.of())));
         LifesSkript.publish(service);

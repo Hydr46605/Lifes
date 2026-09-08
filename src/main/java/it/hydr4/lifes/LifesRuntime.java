@@ -5,6 +5,7 @@ import it.hydr4.lifes.config.SettingsParser;
 import it.hydr4.lifes.death.ActionSets;
 import it.hydr4.lifes.death.ActionSetsBuilder;
 import it.hydr4.lifes.discord.DiscordGateway;
+import it.hydr4.lifes.hook.UltimateUiHook;
 import it.hydr4.lifes.text.Messages;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -16,14 +17,16 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class LifesRuntime {
     private final Path settingsFile;
     private final DiscordGateway discord;
+    private final UltimateUiHook hookOrNull;
     private final AtomicReference<Snapshot> snapshot;
 
     private record Snapshot(LivesSettings settings, Messages messages, ActionSets actions) {
     }
 
-    private LifesRuntime(Path settingsFile, DiscordGateway discord, Snapshot initial) {
+    private LifesRuntime(Path settingsFile, DiscordGateway discord, UltimateUiHook hookOrNull, Snapshot initial) {
         this.settingsFile = settingsFile;
         this.discord = discord;
+        this.hookOrNull = hookOrNull;
         this.snapshot = new AtomicReference<>(initial);
     }
 
@@ -34,12 +37,17 @@ public final class LifesRuntime {
      * re-read configuration without restarting delivery mid-flight.
      */
     public static LifesRuntime load(Path settingsFile, DiscordGateway discord) {
-        return new LifesRuntime(settingsFile, discord, buildSnapshot(settingsFile, discord));
+        return load(settingsFile, discord, null);
+    }
+
+    /** Loads with an attached UltimateUI hook, so ULTIMATEUI_* actions can build. */
+    public static LifesRuntime load(Path settingsFile, DiscordGateway discord, UltimateUiHook hookOrNull) {
+        return new LifesRuntime(settingsFile, discord, hookOrNull, buildSnapshot(settingsFile, discord, hookOrNull));
     }
 
     /** Re-parses, validates and atomically swaps the runtime. */
     public void reload() {
-        snapshot.set(buildSnapshot(settingsFile, discord));
+        snapshot.set(buildSnapshot(settingsFile, discord, hookOrNull));
     }
 
     public LivesSettings settings() {
@@ -58,13 +66,13 @@ public final class LifesRuntime {
         return settings().maximumLives();
     }
 
-    private static Snapshot buildSnapshot(Path settingsFile, DiscordGateway discord) {
+    private static Snapshot buildSnapshot(Path settingsFile, DiscordGateway discord, UltimateUiHook hookOrNull) {
         var settings = SettingsParser.parse(settingsFile);
         validateCauses(settings);
         return new Snapshot(
             settings,
             new Messages(settings.messages()),
-            ActionSetsBuilder.build(settings, discord)
+            ActionSetsBuilder.build(settings, discord, hookOrNull)
         );
     }
 

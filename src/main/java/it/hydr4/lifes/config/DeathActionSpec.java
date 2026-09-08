@@ -28,8 +28,7 @@ public record DeathActionSpec(String type, Map<String, Object> options, String p
         return text;
     }
 
-    public double optionalDouble(String key, double fallback, double minimum, double maximum) {
-        var value = options.get(key);
+    public double optionalDouble(String key, double fallback, double minimum, double maximum) {        var value = options.get(key);
         if (value == null) {
             return fallback;
         }
@@ -38,6 +37,17 @@ public record DeathActionSpec(String type, Map<String, Object> options, String p
             throw new it.hydr4.lifes.ConfigException(path(key), "must be between " + minimum + " and " + maximum);
         }
         return number;
+    }
+
+    public boolean optionalBoolean(String key, boolean fallback) {
+        var value = options.get(key);
+        if (value == null) {
+            return fallback;
+        }
+        if (!(value instanceof Boolean flag)) {
+            throw new it.hydr4.lifes.ConfigException(path(key), "expected true or false");
+        }
+        return flag;
     }
 
     public String optionalChoice(String key, String fallback, List<String> allowed) {
