@@ -27,6 +27,14 @@ public final class SkriptHook implements AutoCloseable {
 
     /** Publishes the service for Skript, or returns empty when Skript is absent. */
     public static Optional<SkriptHook> tryAttach(LivesService service, Plugin plugin) {
+        return tryAttach(service, plugin, SkriptContext.empty());
+    }
+
+    /**
+     * Publishes the service plus dead-listing, placeholder and UI surfaces for Skript,
+     * or returns empty when Skript is absent.
+     */
+    public static Optional<SkriptHook> tryAttach(LivesService service, Plugin plugin, SkriptContext context) {
         if (plugin.getServer().getPluginManager().getPlugin("Skript") == null) {
             return Optional.empty();
         }
@@ -35,6 +43,7 @@ public final class SkriptHook implements AutoCloseable {
             plugin.getServer().getServicesManager()
                 .register(LivesService.class, service, plugin, ServicePriority.Normal);
             LifesSkript.publish(service);
+            LifesSkript.install(context);
             logger.info("Skript hooks registered (LivesService published, LifeChangeEvent available).");
             return Optional.of(new SkriptHook(plugin));
         } catch (RuntimeException exception) {

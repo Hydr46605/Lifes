@@ -9,8 +9,11 @@ import it.hydr4.lifes.death.ActionRunner;
 import it.hydr4.lifes.discord.DiscordGateway;
 import it.hydr4.lifes.discord.HttpDiscordTransport;
 import it.hydr4.lifes.hook.PlaceholderApiHook;
+import it.hydr4.lifes.hook.PlaceholderResolver;
+import it.hydr4.lifes.hook.SkriptContext;
 import it.hydr4.lifes.hook.SkriptHook;
 import it.hydr4.lifes.hook.UltimateUiHook;
+import it.hydr4.lifes.hook.UltimateUiRefresher;
 import it.hydr4.lifes.paper.AdminChangeNotifier;
 import it.hydr4.lifes.paper.BukkitEventBridge;
 import it.hydr4.lifes.paper.DeathListener;
@@ -43,8 +46,11 @@ public final class Lifes extends JavaPlugin {
         // Created before the runtime because building the action pipelines needs it, and closed
         // again below if the configuration turns out to be unusable.
         discord = new DiscordGateway(new HttpDiscordTransport(), getLogger(), DiscordGateway.DEFAULT_RETRIES);
+        // Attached before the runtime because ULTIMATEUI_* actions build against it, and it needs
+        // no Lifes state of its own. A failed config still leaves a harmless attached hook.
+        ultimateUiHook = UltimateUiHook.tryAttach(this).orElse(null);
         try {
-            runtime = LifesRuntime.load(new File(getDataFolder(), "settings.yml").toPath(), discord);
+            runtime = LifesRuntime.load(new File(getDataFolder(), "settings.yml").toPath(), discord, ultimateUiHook);
         } catch (ConfigException exception) {
             discord.close();
             discord = null;
@@ -78,6 +84,9 @@ public final class Lifes extends JavaPlugin {
         service.addListener(actionRunner);
         service.addListener(new BukkitEventBridge());
         service.addListener(new AdminChangeNotifier(() -> runtime.messages()));
+        if (ultimateUiHook != null) {
+            service.addListener(new UltimateUiRefresher(ultimateUiHook, () -> runtime.settings()));
+        }
 
         getServer().getPluginManager().registerEvents(new DeathListener(service, () -> runtime.settings()), this);
         getServer().getPluginManager().registerEvents(new JoinListener(() -> service), this);
@@ -102,9 +111,14 @@ public final class Lifes extends JavaPlugin {
             return;
         }
 
-        placeholderHook = PlaceholderApiHook.tryAttach(runtime, service, this).orElse(null);
-        skriptHook = SkriptHook.tryAttach(service, this).orElse(null);
-        ultimateUiHook = UltimateUiHook.tryAttach(this).orElse(null);
+        placeholderHook = PlaceholderApiHook.tryAttach(runtime, service, this, directory::all).orElse(null);
+        skriptHook = SkriptHook.tryAttach(service, this, new SkriptContext(
+            directory::all,
+            () -> new PlaceholderResolver(service,
+                () -> runtime.settings().maximumLives(),
+                () -> runtime.settings().defaultLives(),
+                directory::all),
+            ultimateUiHook)).orElse(null);
         getLogger().info("Enabled v" + getPluginMeta().getVersion());
     }
 
