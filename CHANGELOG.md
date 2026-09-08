@@ -4,6 +4,15 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-08
+
+### Added
+
+- UltimateUI actions for every pipeline: `ULTIMATEUI_OPEN` (`gui` required, `hud`/`autoclose` default false), `ULTIMATEUI_CLOSE` (optional `gui`) and `ULTIMATEUI_SET` (`element` + `text` with the unified `{player}` `{lives}` `{delta}` `{before}` `{reason}` placeholders). Configs using them without UltimateUI attached fail startup with the exact action path.
+- Optional `ultimateui` settings section (`refresh-gui`, `refresh-element`, `refresh-text`, default `{lives}`): rewrites one HUD text element after every life change while the named GUI is open. Both blank disables it; half-configured fails startup with the exact path.
+- Dead-account surfaces sharing one sorted A-Z view: `%lifes_dead_count%`, `%lifes_dead_list%` (first 20 plus ` (+N more)`), `%lifes_dead_list_<limit>_<separator>%` (`comma`/`newline`/`pipe`/`plus`, up to 100, `:` works like `_`), and `/lives list dead` (permission `lifes.command.list`, op, child of `lifes.admin`) with configurable `lives-list-dead-header/entry/more/empty` and `lives-list-invalid-filter` messages.
+- Full Skript surface with no new dependencies and no breaking changes: `LifesSkript` gains `create`, `applyDeath`, `deadCount`, `deadNames`, `placeholder` (every Lifes placeholder without PlaceholderAPI) and `openGui`/`closeGui`/`setElement` UI helpers, `SkriptHook` gains an additive context overload, and `docs/skript.md` holds copy-paste skript-reflect examples including the `LifeChangeEvent` listener.
+
 ## [0.3.0] - 2026-09-07
 
 ### Added
@@ -66,7 +75,8 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - Bukkit `LifeChangeEvent` for integrations; domain listeners for internal reactions.
 - Hermetic build: checksum-pinned Gradle, `-Werror`, SemVer validation, CI on Linux and Windows, release automation for `v` tags.
 
-[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.3.0
 [0.2.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.0
