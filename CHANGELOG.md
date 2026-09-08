@@ -4,6 +4,12 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-08
+
+### Added
+
+- `%lifes_last_victim%` placeholder: the last player hit by a counted death, empty until the first one. Pair it with an UltimateUI item head (`material: "PLAYER_HEAD:%lifes_last_victim%"`) to render any victim's head — `%player_head%` is viewer-only by design. Also available through `LifesSkript.placeholder("last_victim", null)`.
+
 ## [0.4.0] - 2026-09-08
 
 ### Added
@@ -75,7 +81,8 @@ All notable changes to Lifes are documented in this file. The format follows [Ke
 - Bukkit `LifeChangeEvent` for integrations; domain listeners for internal reactions.
 - Hermetic build: checksum-pinned Gradle, `-Werror`, SemVer validation, CI on Linux and Windows, release automation for `v` tags.
 
-[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Hydr46605/Lifes/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Hydr46605/Lifes/releases/tag/v0.3.0
 [0.2.1]: https://github.com/Hydr46605/Lifes/releases/tag/v0.2.1

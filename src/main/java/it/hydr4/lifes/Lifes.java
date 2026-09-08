@@ -5,6 +5,7 @@ import it.hydr4.lifes.command.CommandWiring;
 import it.hydr4.lifes.command.suggest.PlayerNameIndex;
 import it.hydr4.lifes.core.AccountDirectory;
 import it.hydr4.lifes.core.DefaultLivesService;
+import it.hydr4.lifes.core.LastVictim;
 import it.hydr4.lifes.death.ActionRunner;
 import it.hydr4.lifes.discord.DiscordGateway;
 import it.hydr4.lifes.discord.HttpDiscordTransport;
@@ -72,6 +73,8 @@ public final class Lifes extends JavaPlugin {
         }
 
         service = new DefaultLivesService(directory, () -> runtime.settings());
+        var lastVictim = new LastVictim();
+        service.addListener(lastVictim);
         saveQueue = new AsyncSaveQueue(
             repository,
             this::snapshot,
@@ -111,13 +114,14 @@ public final class Lifes extends JavaPlugin {
             return;
         }
 
-        placeholderHook = PlaceholderApiHook.tryAttach(runtime, service, this, directory::all).orElse(null);
+        placeholderHook = PlaceholderApiHook.tryAttach(runtime, service, this, directory::all, lastVictim::name).orElse(null);
         skriptHook = SkriptHook.tryAttach(service, this, new SkriptContext(
             directory::all,
             () -> new PlaceholderResolver(service,
                 () -> runtime.settings().maximumLives(),
                 () -> runtime.settings().defaultLives(),
-                directory::all),
+                directory::all,
+                lastVictim::name),
             ultimateUiHook)).orElse(null);
         getLogger().info("Enabled v" + getPluginMeta().getVersion());
     }

@@ -22,11 +22,17 @@ public final class LifesExpansion extends PlaceholderExpansion {
 
     public LifesExpansion(LifesRuntime runtime, LivesService service,
         Supplier<Collection<LivesAccount>> accounts, String version) {
+        this(runtime, service, accounts, () -> "", version);
+    }
+
+    public LifesExpansion(LifesRuntime runtime, LivesService service,
+        Supplier<Collection<LivesAccount>> accounts, Supplier<String> lastVictim, String version) {
         this.resolver = new PlaceholderResolver(
             service,
             runtime::maximumLives,
             () -> runtime.settings().defaultLives(),
-            accounts
+            accounts,
+            lastVictim
         );
         this.version = version;
     }

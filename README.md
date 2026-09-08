@@ -12,7 +12,7 @@ Built for **Zyle Extreme**, the permadeath mode of the Minecraft server **Zyle**
 |---|---|
 | Platform | Paper 1.21.11 |
 | Java | 21 |
-| Release | [v0.4.0](https://github.com/Hydr46605/Lifes/releases/tag/v0.4.0) |
+| Release | [v0.4.1](https://github.com/Hydr46605/Lifes/releases/tag/v0.4.1) |
 | License | [Apache 2.0](LICENSE) |
 
 ## Install
@@ -52,6 +52,7 @@ Requires PlaceholderAPI. All of them resolve for offline players with a known ac
 | `%lifes_dead_count%` | Number of exhausted accounts |
 | `%lifes_dead_list%` | Dead names A-Z, first 20, ` (+N more)` when truncated |
 | `%lifes_dead_list_<limit>_<sep>%` | Same, up to 100 names; `sep` is `comma`, `newline`, `pipe` or `plus` (`:` works like `_`) |
+| `%lifes_last_victim%` | Last player hit by a counted death (empty until the first one) — pair with `PLAYER_HEAD:%lifes_last_victim%` for victim heads |
 
 ## Configuration
 

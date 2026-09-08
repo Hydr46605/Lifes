@@ -16,23 +16,36 @@ import java.util.function.Supplier;
  * {@code pipe}, or {@code plus} for the {@code +}-joined speedrun style. Bare
  * {@code dead_list} shows the first {@value DeadAccounts#DEFAULT_LIMIT} names and appends
  * {@code (+N more)} when truncated. An unreadable limit yields the empty string.
+ * {@code last_victim} is the last player hit by a counted death, empty until the first one.
  */
 public final class PlaceholderResolver {
     private final LivesService service;
     private final Supplier<Integer> maximumLives;
     private final Supplier<Integer> defaultLives;
     private final Supplier<Collection<LivesAccount>> accounts;
+    private final Supplier<String> lastVictim;
 
     public PlaceholderResolver(LivesService service, Supplier<Integer> maximumLives, Supplier<Integer> defaultLives) {
-        this(service, maximumLives, defaultLives, java.util.List::of);
+        this(service, maximumLives, defaultLives, java.util.List::of, "");
     }
 
     public PlaceholderResolver(LivesService service, Supplier<Integer> maximumLives,
         Supplier<Integer> defaultLives, Supplier<Collection<LivesAccount>> accounts) {
+        this(service, maximumLives, defaultLives, accounts, "");
+    }
+
+    public PlaceholderResolver(LivesService service, Supplier<Integer> maximumLives,
+        Supplier<Integer> defaultLives, Supplier<Collection<LivesAccount>> accounts, String lastVictim) {
+        this(service, maximumLives, defaultLives, accounts, () -> lastVictim);
+    }
+
+    public PlaceholderResolver(LivesService service, Supplier<Integer> maximumLives,
+        Supplier<Integer> defaultLives, Supplier<Collection<LivesAccount>> accounts, Supplier<String> lastVictim) {
         this.service = java.util.Objects.requireNonNull(service, "service");
         this.maximumLives = java.util.Objects.requireNonNull(maximumLives, "maximumLives");
         this.defaultLives = java.util.Objects.requireNonNull(defaultLives, "defaultLives");
         this.accounts = java.util.Objects.requireNonNull(accounts, "accounts");
+        this.lastVictim = java.util.Objects.requireNonNull(lastVictim, "lastVictim");
     }
 
     /** @return the placeholder value, or null when the placeholder is unknown. */
@@ -51,6 +64,7 @@ public final class PlaceholderResolver {
                 ? "never"
                 : account.lastDeathAt().toString();
             case "dead_count" -> String.valueOf(DeadAccounts.count(accounts));
+            case "last_victim" -> lastVictim.get();
             default -> deadList(params);
         };
     }

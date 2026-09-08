@@ -27,12 +27,18 @@ public final class PlaceholderApiHook implements AutoCloseable {
     /** Attaches with an account source, so dead-list placeholders can resolve. */
     public static Optional<PlaceholderApiHook> tryAttach(LifesRuntime runtime, LivesService service,
         Plugin plugin, Supplier<Collection<LivesAccount>> accounts) {
+        return tryAttach(runtime, service, plugin, accounts, () -> "");
+    }
+
+    /** Attaches with an account source and a last-victim source. */
+    public static Optional<PlaceholderApiHook> tryAttach(LifesRuntime runtime, LivesService service,
+        Plugin plugin, Supplier<Collection<LivesAccount>> accounts, Supplier<String> lastVictim) {
         if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
             return Optional.empty();
         }
         var logger = plugin.getLogger();
         try {
-            var expansion = new LifesExpansion(runtime, service, accounts, plugin.getPluginMeta().getVersion());
+            var expansion = new LifesExpansion(runtime, service, accounts, lastVictim, plugin.getPluginMeta().getVersion());
             if (!expansion.register()) {
                 logger.warning("PlaceholderAPI refused the Lifes expansion registration.");
                 return Optional.empty();

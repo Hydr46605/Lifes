@@ -80,4 +80,18 @@ class DeadAccountsTest {
     void unknownPlaceholdersStillYieldNull() {
         assertNull(resolver.resolve(null, "dead_pool"));
     }
+
+    @Test
+    void lastVictimTracksCountedDeaths() {
+        var tracker = new it.hydr4.lifes.core.LastVictim();
+        var withVictim = new PlaceholderResolver(service, () -> 10, () -> 3, directory::all, tracker::name);
+        assertEquals("", withVictim.resolve(null, "last_victim"));
+        service.addListener(tracker);
+        var id = UUID.randomUUID();
+        service.create(id, "Hydr4");
+        service.adjust(id, LifeChangeReason.ADMIN_ADD, 1);
+        assertEquals("", withVictim.resolve(null, "last_victim"));
+        service.applyDeath(id, "Hydr4", 1);
+        assertEquals("Hydr4", withVictim.resolve(null, "last_victim"));
+    }
 }
