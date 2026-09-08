@@ -12,7 +12,7 @@ Built for **Zyle Extreme**, the permadeath mode of the Minecraft server **Zyle**
 |---|---|
 | Platform | Paper 1.21.11 |
 | Java | 21 |
-| Release | [v0.2.1](https://github.com/Hydr46605/Lifes/releases/tag/v0.2.1) |
+| Release | [v0.4.0](https://github.com/Hydr46605/Lifes/releases/tag/v0.4.0) |
 | License | [Apache 2.0](LICENSE) |
 
 ## Install
@@ -31,6 +31,7 @@ Aliases: `vite`, `lifes`.
 | `/lives add <player> <amount>` | `lifes.command.add` (op) | Gives lives |
 | `/lives remove <player> <amount>` | `lifes.command.remove` (op) | Removes lives |
 | `/lives reset <player>` | `lifes.command.reset` (op) | Restores the default amount |
+| `/lives list dead` | `lifes.command.list` (op) | Lists exhausted accounts, A-Z, first 20 |
 | `/lives reload` | `lifes.command.reload` (op) | Reloads `settings.yml` |
 
 Admin operations work on offline players whenever the account is known to Lifes. Tab completion only offers what the sender is allowed to run, and lists online players before known offline accounts.
@@ -48,6 +49,9 @@ Requires PlaceholderAPI. All of them resolve for offline players with a known ac
 | `%lifes_total_deaths%` | Recorded deaths |
 | `%lifes_status%` | `alive` or `exhausted` |
 | `%lifes_last_death%` | ISO-8601 instant, or `never` |
+| `%lifes_dead_count%` | Number of exhausted accounts |
+| `%lifes_dead_list%` | Dead names A-Z, first 20, ` (+N more)` when truncated |
+| `%lifes_dead_list_<limit>_<sep>%` | Same, up to 100 names; `sep` is `comma`, `newline`, `pipe` or `plus` (`:` works like `_`) |
 
 ## Configuration
 
@@ -57,10 +61,33 @@ Requires PlaceholderAPI. All of them resolve for offline players with a known ac
 - `death.ignored-causes` skips deaths matching an `EntityDamageEvent.DamageCause` name.
 - `death.actions` runs on every death that costs a life. `exhaustion.actions` runs when lives reach zero, and `PERMABAN` is the default exit there. `gain.actions` runs on any life gain that does not leave zero lives, `resurrect.actions` only when a gain leaves zero (`before.lives == 0`, `delta > 0`). All action templates share `{player}` `{lives}` `{delta}` `{before}` `{reason}` (plus `{uuid}` `{maximum}`, and `{deaths}` on Discord).
 - `exhaustion.on-zero-lives-join` covers an account that connects while already at zero lives, which is what happens after an admin lifts a ban: `REAPPLY` runs the exit pipeline again, `KICK` only removes the session, `IGNORE` lets them play on.
-- Actions are ordered and typed: `MESSAGE`, `SOUND`, `COMMAND`, `PERMABAN`, `DISCORD`.
+- Actions are ordered and typed: `MESSAGE`, `SOUND`, `COMMAND`, `PERMABAN`, `DISCORD`, `ULTIMATEUI_OPEN`, `ULTIMATEUI_CLOSE`, `ULTIMATEUI_SET` (the last three need UltimateUI attached and fail startup with their path otherwise).
+- `ultimateui.refresh-gui` + `refresh-element` + `refresh-text` rewrite one HUD text element after every life change while that GUI is open; both blank disables it.
 - `DISCORD` posts a raw Discord JSON payload to a webhook, so deaths and eliminations can land in different channels. The payload is validated at load, placeholders are JSON-escaped, and delivery retries rate limits without ever stalling the server.
 - `saves.yml` is written atomically and off the main thread. Any damage, at the root or inside a single entry, is preserved as `saves.yml.broken-<timestamp>` and aborts startup instead of dropping accounts or resetting data.
 - Optional hooks, all no-ops when the target plugin is absent: Skript (the running `LivesService` is published to the Bukkit `ServicesManager` and to `it.hydr4.lifes.hook.LifesSkript` for skript-reflect, `LifeChangeEvent` fires as a Bukkit event) and UltimateUI (reflection-only hook gated on the investigated build's API shape, refuses on mismatch).
+
+## Skript
+
+Requires Skript + skript-reflect. One import per script file:
+
+```
+import:
+    it.hydr4.lifes.hook.LifesSkript
+```
+
+```applescript
+set {_lives} to LifesSkript.livesOfName("Hydr4").orElse(-1)
+set {_dead::*} to LifesSkript.deadNames(10)
+LifesSkript.adjust(player's uuid, "ADMIN_ADD", 1)
+# Any placeholder without PlaceholderAPI:
+set {_line} to LifesSkript.placeholder("dead_list_5_newline", null)
+# UltimateUI (false when the player is offline):
+LifesSkript.setElement(player's uuid, "lives-text", "3 lives left")
+```
+
+Life changes arrive as a regular Bukkit event (`it.hydr4.lifes.paper.LifeChangeEvent`)
+with `getChange()` exposing `before()`, `after()`, `delta()` and `reason()`.
 
 ## Building
 

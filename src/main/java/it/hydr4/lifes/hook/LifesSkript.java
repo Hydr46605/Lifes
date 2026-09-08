@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * <p>Kept free of any Skript API types on purpose: the plugin never depends on Skript at
  * compile time, so this works with every Skript version and can never break the build when
  * Skript is absent. {@link SkriptHook} publishes the running {@link LivesService} here on
- * enable and clears it on disable. Usage examples live in {@code docs/skript.md}.
+ * enable and clears it on disable. Usage examples live in the README Skript section.
  */
 public final class LifesSkript {
     private static final AtomicReference<LivesService> SERVICE = new AtomicReference<>();
