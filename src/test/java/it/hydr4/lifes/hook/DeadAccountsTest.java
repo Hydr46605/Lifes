@@ -82,6 +82,17 @@ class DeadAccountsTest {
     }
 
     @Test
+    void deadIndexYieldsSingleNames() {
+        service.create(UUID.randomUUID(), "Hydr4");
+        exhaust("Zed");
+        exhaust("Amy");
+        assertEquals("Amy", resolver.resolve(null, "dead_1"));
+        assertEquals("Zed", resolver.resolve(null, "dead_2"));
+        assertEquals("", resolver.resolve(null, "dead_3"));
+        assertEquals("", resolver.resolve(null, "dead_0"));
+    }
+
+    @Test
     void lastVictimTracksCountedDeaths() {
         var tracker = new it.hydr4.lifes.core.LastVictim();
         var withVictim = new PlaceholderResolver(service, () -> 10, () -> 3, directory::all, tracker::name);

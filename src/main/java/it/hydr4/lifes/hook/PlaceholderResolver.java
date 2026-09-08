@@ -65,8 +65,28 @@ public final class PlaceholderResolver {
                 : account.lastDeathAt().toString();
             case "dead_count" -> String.valueOf(DeadAccounts.count(accounts));
             case "last_victim" -> lastVictim.get();
-            default -> deadList(params);
+            default -> deadEntry(params);
         };
+    }
+
+    /** {@code dead_list...} and {@code dead_<n>} entries; null when not a dead placeholder. */
+    private String deadEntry(String params) {
+        if (!params.startsWith("dead_")) {
+            return null;
+        }
+        if (params.startsWith("dead_list")) {
+            return deadList(params);
+        }
+        int index;
+        try {
+            index = Integer.parseInt(params.substring("dead_".length()));
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+        if (index < 1) {
+            return "";
+        }
+        return DeadAccounts.at(accounts, index).orElse("");
     }
 
     private String deadList(String params) {

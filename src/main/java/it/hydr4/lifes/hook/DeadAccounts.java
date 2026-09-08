@@ -5,6 +5,7 @@ import it.hydr4.lifes.api.LivesAccount;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -38,5 +39,15 @@ public final class DeadAccounts {
     /** Number of exhausted accounts. */
     public static long count(Supplier<Collection<LivesAccount>> accounts) {
         return accounts.get().stream().filter(LivesAccount::exhausted).count();
+    }
+
+    /** Name at the 1-based position of the sorted dead list, or empty when out of range. */
+    public static Optional<String> at(Supplier<Collection<LivesAccount>> accounts, int index) {
+        return accounts.get().stream()
+            .filter(LivesAccount::exhausted)
+            .map(LivesAccount::name)
+            .sorted(String.CASE_INSENSITIVE_ORDER.thenComparing(Comparator.naturalOrder()))
+            .skip(index - 1L)
+            .findFirst();
     }
 }
