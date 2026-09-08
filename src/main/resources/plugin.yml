@@ -31,6 +31,9 @@ permissions:
   lifes.command.reload:
     description: Reload the Lifes configuration
     default: op
+  lifes.command.list:
+    description: List dead accounts
+    default: op
   lifes.admin:
     description: Grants every administrative lives command
     default: op
@@ -41,3 +44,4 @@ permissions:
       lifes.command.remove: true
       lifes.command.reset: true
       lifes.command.reload: true
+      lifes.command.list: true

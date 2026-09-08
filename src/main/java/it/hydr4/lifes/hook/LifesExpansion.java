@@ -2,10 +2,14 @@ package it.hydr4.lifes.hook;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import it.hydr4.lifes.LifesRuntime;
+import it.hydr4.lifes.api.LivesAccount;
 import it.hydr4.lifes.api.LivesService;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.function.Supplier;
 
 /** PlaceholderAPI expansion backed by {@link PlaceholderResolver}. */
 public final class LifesExpansion extends PlaceholderExpansion {
@@ -13,10 +17,16 @@ public final class LifesExpansion extends PlaceholderExpansion {
     private final String version;
 
     public LifesExpansion(LifesRuntime runtime, LivesService service, String version) {
+        this(runtime, service, java.util.List::of, version);
+    }
+
+    public LifesExpansion(LifesRuntime runtime, LivesService service,
+        Supplier<Collection<LivesAccount>> accounts, String version) {
         this.resolver = new PlaceholderResolver(
             service,
             runtime::maximumLives,
-            () -> runtime.settings().defaultLives()
+            () -> runtime.settings().defaultLives(),
+            accounts
         );
         this.version = version;
     }

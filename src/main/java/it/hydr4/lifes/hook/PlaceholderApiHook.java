@@ -1,10 +1,13 @@
 package it.hydr4.lifes.hook;
 
 import it.hydr4.lifes.LifesRuntime;
+import it.hydr4.lifes.api.LivesAccount;
 import it.hydr4.lifes.api.LivesService;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,12 +21,18 @@ public final class PlaceholderApiHook implements AutoCloseable {
 
     /** Returns the attached hook, or empty when PlaceholderAPI is absent or refused registration. */
     public static Optional<PlaceholderApiHook> tryAttach(LifesRuntime runtime, LivesService service, Plugin plugin) {
+        return tryAttach(runtime, service, plugin, java.util.List::of);
+    }
+
+    /** Attaches with an account source, so dead-list placeholders can resolve. */
+    public static Optional<PlaceholderApiHook> tryAttach(LifesRuntime runtime, LivesService service,
+        Plugin plugin, Supplier<Collection<LivesAccount>> accounts) {
         if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
             return Optional.empty();
         }
         var logger = plugin.getLogger();
         try {
-            var expansion = new LifesExpansion(runtime, service, plugin.getPluginMeta().getVersion());
+            var expansion = new LifesExpansion(runtime, service, accounts, plugin.getPluginMeta().getVersion());
             if (!expansion.register()) {
                 logger.warning("PlaceholderAPI refused the Lifes expansion registration.");
                 return Optional.empty();

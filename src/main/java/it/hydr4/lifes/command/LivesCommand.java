@@ -15,6 +15,8 @@ import it.hydr4.lifes.api.LifeChangeReason;
 import it.hydr4.lifes.api.LivesAccount;
 import it.hydr4.lifes.api.LivesService;
 import it.hydr4.lifes.command.suggest.SuggestionKeys;
+import it.hydr4.lifes.core.AccountDirectory;
+import it.hydr4.lifes.hook.DeadAccounts;
 import it.hydr4.lifes.text.MessageKey;
 
 /** The {@code /lives} command tree: user self-check and admin subcommands. */
@@ -22,10 +24,16 @@ import it.hydr4.lifes.text.MessageKey;
 public final class LivesCommand {
     private final LifesRuntime runtime;
     private final LivesService service;
+    private final AccountDirectory directory;
 
     public LivesCommand(LifesRuntime runtime, LivesService service) {
+        this(runtime, service, new AccountDirectory());
+    }
+
+    public LivesCommand(LifesRuntime runtime, LivesService service, AccountDirectory directory) {
         this.runtime = java.util.Objects.requireNonNull(runtime, "runtime");
         this.service = java.util.Objects.requireNonNull(service, "service");
+        this.directory = java.util.Objects.requireNonNull(directory, "directory");
     }
 
     @DefaultExecution
@@ -94,10 +102,40 @@ public final class LivesCommand {
         return adjust(player, LifeChangeReason.ADMIN_RESET, 0);
     }
 
+    @Subcommand("list")
+    @Permission("lifes.command.list")
+    public CommandResult list(
+        CommandSource source,
+        @Argument("filter") String filter
+    ) {
+        if (!filter.equalsIgnoreCase("dead")) {
+            return CommandResult.failure(CommandFailure.INVALID_ARGUMENT,
+                message(MessageKey.LIVES_LIST_INVALID_FILTER, "filter", filter));
+        }
+        var total = DeadAccounts.count(directory::all);
+        if (total == 0) {
+            return CommandResult.success(message(MessageKey.LIVES_LIST_DEAD_EMPTY));
+        }
+        var names = DeadAccounts.names(directory::all, DeadAccounts.DEFAULT_LIMIT);
+        var truncated = names.size() > DeadAccounts.DEFAULT_LIMIT;
+        var shown = truncated ? names.subList(0, DeadAccounts.DEFAULT_LIMIT) : names;
+        var lines = new java.util.ArrayList<net.kyori.adventure.text.Component>(shown.size() + 2);
+        lines.add(message(MessageKey.LIVES_LIST_DEAD_HEADER, "count", total, "shown", shown.size()));
+        for (var name : shown) {
+            lines.add(message(MessageKey.LIVES_LIST_DEAD_ENTRY, "player", name));
+        }
+        if (truncated) {
+            lines.add(message(MessageKey.LIVES_LIST_DEAD_MORE, "remaining", total - shown.size()));
+        }
+        return CommandResult.success(net.kyori.adventure.text.Component.join(
+            net.kyori.adventure.text.JoinConfiguration.separator(
+                net.kyori.adventure.text.Component.newline()),
+            lines));
+    }
+
     @Subcommand("reload")
     @Permission("lifes.command.reload")
-    public CommandResult reload(CommandSource source) {
-        try {
+    public CommandResult reload(CommandSource source) {        try {
             runtime.reload();
         } catch (ConfigException exception) {
             return CommandResult.failure(

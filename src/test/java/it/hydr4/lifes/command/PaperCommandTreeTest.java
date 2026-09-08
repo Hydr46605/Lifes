@@ -61,6 +61,7 @@ class PaperCommandTreeTest {
         "lifes.command.remove",
         "lifes.command.reset",
         "lifes.command.reload",
+        "lifes.command.list",
         "lifes.command.check.self"
     );
 
@@ -155,6 +156,7 @@ class PaperCommandTreeTest {
         var lines = completed("lives ", Set.copyOf(ADMIN_PERMISSIONS));
         assertTrue(lines.contains("lives add"), lines.toString());
         assertTrue(lines.contains("lives check"), lines.toString());
+        assertTrue(lines.contains("lives list"), lines.toString());
         assertTrue(lines.contains("lives reload"), lines.toString());
     }
 
@@ -187,7 +189,7 @@ class PaperCommandTreeTest {
     void subcommandsWithoutTheirPermissionAreNotUsable() {
         var nobody = source(Set.of());
         var admin = source(Set.copyOf(ADMIN_PERMISSIONS));
-        for (var name : List.of("add", "check", "reload", "remove", "reset", "set")) {
+        for (var name : List.of("add", "check", "list", "reload", "remove", "reset", "set")) {
             var node = root.getChild(name);
             assertTrue(node.canUse(admin), name + " should be usable by an admin");
             assertFalse(node.canUse(nobody), name + " should be hidden from a sender without its permission");
@@ -198,7 +200,7 @@ class PaperCommandTreeTest {
     void aSenderWithOnePermissionCanUseOnlyThatSubcommand() {
         var source = source(Set.of("lifes.command.check.others"));
         assertTrue(root.getChild("check").canUse(source));
-        for (var name : List.of("add", "reload", "remove", "reset", "set")) {
+        for (var name : List.of("add", "list", "reload", "remove", "reset", "set")) {
             assertFalse(root.getChild(name).canUse(source), name + " leaked to a sender without its permission");
         }
     }

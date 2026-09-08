@@ -56,7 +56,7 @@ class LivesCommandTest {
         directory = new AccountDirectory();
         service = new DefaultLivesService(directory, runtime::settings);
         harness = new CommandTestHarness();
-        harness.register(new LivesCommandDemocracyCommand(new LivesCommand(runtime, service)));
+        harness.register(new LivesCommandDemocracyCommand(new LivesCommand(runtime, service, directory)));
         player = CommandTestSource.player(UUID.randomUUID(), "Guest").grant("lifes.command.check.self");
         admin = CommandTestSource.console();
         for (var permission : new String[] {
@@ -66,6 +66,7 @@ class LivesCommandTest {
             "lifes.command.remove",
             "lifes.command.reset",
             "lifes.command.reload",
+            "lifes.command.list",
         }) {
             admin.grant(permission);
         }
@@ -163,5 +164,35 @@ class LivesCommandTest {
     void reloadSucceedsOnAValidFile() {
         var result = harness.execute(admin, "lives reload");
         assertInstanceOf(CommandResult.Success.class, result);
+    }
+
+    @Test
+    void listDeadReportsEmptyWhenNobodyDied() {
+        var result = harness.execute(admin, "lives list dead");
+        assertInstanceOf(CommandResult.Success.class, result);
+        assertTrue(plain(result).contains("Nobody is dead"), plain(result));
+    }
+
+    @Test
+    void listDeadShowsOnlyExhaustedAccounts() {
+        var alive = UUID.randomUUID();
+        var dead = UUID.randomUUID();
+        service.create(alive, "Hydr4");
+        service.create(dead, "Ghost");
+        service.adjust(dead, it.hydr4.lifes.api.LifeChangeReason.ADMIN_REMOVE, 3);
+        var result = harness.execute(admin, "lives list dead");
+        assertInstanceOf(CommandResult.Success.class, result);
+        var text = plain(result);
+        assertTrue(text.contains("Dead accounts"), text);
+        assertTrue(text.contains("Ghost"), text);
+        assertTrue(!text.contains("Hydr4"), text);
+    }
+
+    @Test
+    void listDeadRejectsUnknownFilters() {
+        service.create(UUID.randomUUID(), "Hydr4");
+        var result = harness.execute(admin, "lives list alive");
+        assertInstanceOf(CommandResult.Failure.class, result);
+        assertEquals(CommandFailure.INVALID_ARGUMENT, ((CommandResult.Failure) result).type());
     }
 }

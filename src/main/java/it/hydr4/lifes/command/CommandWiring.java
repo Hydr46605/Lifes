@@ -27,7 +27,7 @@ public final class CommandWiring implements AutoCloseable {
     ) {
         var catalog = new DefaultCommandCatalog();
         catalog.registerSuggestionProvider(SuggestionKeys.ONLINE_PLAYERS, new OnlinePlayerSuggestions(names, directory));
-        var generated = new LivesCommandDemocracyCommand(new LivesCommand(runtime, service));
+        var generated = new LivesCommandDemocracyCommand(new LivesCommand(runtime, service, directory));
         var registration = catalog.register(generated);
         PaperCommandTree.register(plugin, catalog, generated, runtime);
         return new CommandWiring(registration);

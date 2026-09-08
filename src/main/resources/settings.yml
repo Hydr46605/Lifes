@@ -14,7 +14,14 @@ death:
   # Valid names: https://jd.papermc.io/paper/1.21/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
   ignored-causes: []
   # Runs in order after every counted death.
-  # Types: MESSAGE, SOUND, COMMAND, PERMABAN, DISCORD
+  # Types: MESSAGE, SOUND, COMMAND, PERMABAN, DISCORD, ULTIMATEUI_OPEN, ULTIMATEUI_CLOSE, ULTIMATEUI_SET
+  # ULTIMATEUI_OPEN takes gui (required), hud (false) and autoclose (false):
+  #   - type: ULTIMATEUI_OPEN
+  #     gui: "lives-hud"
+  #     hud: true
+  # ULTIMATEUI_CLOSE takes an optional gui (closes the open GUI when absent).
+  # ULTIMATEUI_SET rewrites one text element of the open GUI (element + text, same
+  # placeholders as MESSAGE).
   # A DISCORD entry posts a raw Discord JSON payload to a webhook. The payload supports
   # {player} {uuid} {lives} {maximum} {deaths} {reason} {delta}, substituted as JSON-escaped
   # strings, and reaches Discord exactly as written (Components V2 included):
@@ -62,6 +69,14 @@ resurrect:
   # Placeholders: {player} {lives} {delta} {before} {reason} plus {uuid} {maximum}.
   actions: []
 
+ultimateui:
+  # Rewrites one text element after every life change, while the named GUI is open.
+  # Both blank disables the refresh. gui + element must be set together.
+  # refresh-text supports {player} {lives} {delta} {before} {reason} plus {uuid} {maximum} {deaths}.
+  refresh-gui: ""
+  refresh-element: ""
+  refresh-text: "{lives}"
+
 persistence:
   # Seconds between periodic saves; 0 disables. Every change also saves.
   save-interval-seconds: 300
@@ -82,4 +97,9 @@ messages:
   lives-target-notify: "An administrator set your lives to <bold><gold>{lives}</gold></bold>."
   lives-exhausted-kick: "<red>You are out of lives. The game is over for this account.</red>"
   lives-reload-done: "Configuration reloaded."
+  lives-list-dead-header: "Dead accounts (<gold>{count}</gold>, showing {shown}):"
+  lives-list-dead-entry: "<gray>-</gray> {player}"
+  lives-list-dead-more: "<gray>(+{remaining} more...)</gray>"
+  lives-list-dead-empty: "Nobody is dead."
+  lives-list-invalid-filter: "Unknown list '{filter}'; expected: dead."
   no-permission: "<red>You do not have permission to use this command.</red>"

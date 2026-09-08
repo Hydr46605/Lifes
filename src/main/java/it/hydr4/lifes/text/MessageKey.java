@@ -14,6 +14,11 @@ public enum MessageKey {
     LIVES_TARGET_NOTIFY("lives-target-notify", "An administrator set your lives to <bold><gold>{lives}</gold></bold>.", true),
     LIVES_EXHAUSTED_KICK("lives-exhausted-kick", "<red>You are out of lives. The game is over for this account.</red>", false),
     LIVES_RELOAD_DONE("lives-reload-done", "Configuration reloaded.", true),
+    LIVES_LIST_DEAD_HEADER("lives-list-dead-header", "Dead accounts (<gold>{count}</gold>, showing {shown}):", true),
+    LIVES_LIST_DEAD_ENTRY("lives-list-dead-entry", "<gray>-</gray> {player}", true),
+    LIVES_LIST_DEAD_MORE("lives-list-dead-more", "<gray>(+{remaining} more...)</gray>", true),
+    LIVES_LIST_DEAD_EMPTY("lives-list-dead-empty", "Nobody is dead.", true),
+    LIVES_LIST_INVALID_FILTER("lives-list-invalid-filter", "Unknown list '{filter}'; expected: dead.", true),
     NO_PERMISSION("no-permission", "<red>You do not have permission to use this command.</red>", true);
 
     private final String key;
